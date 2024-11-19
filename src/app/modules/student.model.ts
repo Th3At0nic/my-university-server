@@ -29,24 +29,45 @@ const LocalGuardianSchema = new Schema<LocalGuardian>({
 });
 
 const studentSchema = new Schema<Student>({
-  id: { type: String },
-  name: userNameSchema,
-  gender: {
+  id: {
     type: String,
-    enum: ['male', 'female'],
+    required: true,
+    unique: true,
+  },
+  name: {
+    type: userNameSchema,
     required: true,
   },
-  dateOfBirth: String,
-  email: { type: String, required: true },
-  contactNo: { type: String, required: true },
+  gender: {
+    type: String,
+    enum: {
+      values: ['male', 'female', 'others'],
+      message:
+        "{VALUE} is not valid. Gender can be only 'male', 'female' or 'others'",
+    },
+    required: true,
+  },
+  dateOfBirth: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  contactNo: { type: String, required: true, unique: true },
   emergencyContactNo: { type: String, required: true },
-  bloodGroup: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+  bloodGroup: {
+    type: String,
+    enum: {
+      values: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+      message: '{VALUE} is not valid',
+    },
+  },
   presentAddress: { type: String, required: true },
   permanentAddress: { type: String, required: true },
-  guardian: guardianSchema,
-  localGuardian: LocalGuardianSchema,
+  guardian: { type: guardianSchema, required: true },
+  localGuardian: { type: LocalGuardianSchema },
   profileImg: { type: String },
-  isActive: ['active', 'blocked'],
+  isActive: {
+    type: String,
+    enum: ['active', 'blocked'],
+    default: 'active',
+  },
 });
 
 export const StudentModel = model<Student>('Student', studentSchema);
