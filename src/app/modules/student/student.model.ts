@@ -4,7 +4,7 @@ import {
   TStudent,
   TUserName,
   TLocalGuardian,
-  TStudentModel,
+  IStudent,
 } from './student.interface';
 
 const userNameSchema = new Schema<TUserName>({
@@ -106,13 +106,17 @@ const studentSchema = new Schema<TStudent>({
   },
 });
 
-studentSchema.methods.isUserExists = async function (id: string) {
+//creating a static method for the student Schema which will be use to query on the db
+studentSchema.statics.isUserExists = async function (id: string) {
   const existingUser = await StudentModel.findOne({ id });
-
   return existingUser;
 };
 
-export const StudentModel = model<TStudent, TStudentModel>(
-  'Student',
-  studentSchema,
-);
+//these are used to  create an instance method into the schema. this method will query on the db
+// studentSchema.methods.isUserExists = async function (id: string) {
+//   const existingUser = await StudentModel.findOne({ id });
+
+//   return existingUser;
+// };
+
+export const StudentModel = model<TStudent, IStudent>('Student', studentSchema);
