@@ -6,6 +6,8 @@ import {
   TLocalGuardian,
   IStudent,
 } from './student.interface';
+import bcrypt from 'bcrypt';
+import config from '../../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -70,6 +72,13 @@ const studentSchema = new Schema<TStudent>({
     trim: true,
     maxlength: [15, "id can't have more than 15 characters"],
   },
+  password: {
+    type: String,
+    required: true,
+    unique: true,
+    trim: true,
+    maxlength: [35, "Password can't have more than 35 characters"],
+  },
   name: {
     type: userNameSchema,
     required: true,
@@ -104,6 +113,18 @@ const studentSchema = new Schema<TStudent>({
     enum: ['active', 'blocked'],
     default: 'active',
   },
+});
+
+//creating or using mongoose middlewear like pre and post
+studentSchema.pre('save', async function () {
+  this.password = await bcrypt.hash(
+    this.password,
+    Number(config.bcrypt_round_salt),
+  );
+});
+
+studentSchema.post('save', async function () {
+  console.log(this, 'post hook: this is after the save');
 });
 
 //creating a static method for the student Schema which will be use to query on the db

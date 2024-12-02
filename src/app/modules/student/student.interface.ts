@@ -26,6 +26,7 @@ export type TUserName = {
 
 export type TStudent = {
   id: string;
+  password: string;
   name: TUserName;
   gender: 'male' | 'female' | 'others';
   dateOfBirth: string;

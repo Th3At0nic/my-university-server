@@ -45,6 +45,10 @@ const localGuardianValidationSchema = z.object({
 // Validation for Student
 const studentValidationSchema = z.object({
   id: z.string().trim().max(15, "ID can't have more than 15 characters"),
+  password: z
+    .string()
+    .trim()
+    .max(35, "Password can't have more than 35 characters"),
   name: userNameValidationSchema,
   gender: z.enum(['male', 'female', 'others'], {
     errorMap: () => ({
