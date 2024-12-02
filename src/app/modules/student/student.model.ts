@@ -1,12 +1,13 @@
 import { model, Schema } from 'mongoose';
 import {
-  Guardian,
-  Student,
-  UserName,
-  LocalGuardian,
+  TGuardian,
+  TStudent,
+  TUserName,
+  TLocalGuardian,
+  TStudentModel,
 } from './student.interface';
 
-const userNameSchema = new Schema<UserName>({
+const userNameSchema = new Schema<TUserName>({
   firstName: {
     type: String,
     required: true,
@@ -33,7 +34,7 @@ const userNameSchema = new Schema<UserName>({
   },
 });
 
-const guardianSchema = new Schema<Guardian>({
+const guardianSchema = new Schema<TGuardian>({
   fatherName: {
     type: String,
     required: true,
@@ -50,7 +51,7 @@ const guardianSchema = new Schema<Guardian>({
   motherContact: { type: String, required: true },
 });
 
-const LocalGuardianSchema = new Schema<LocalGuardian>({
+const LocalGuardianSchema = new Schema<TLocalGuardian>({
   name: {
     type: String,
     required: true,
@@ -61,7 +62,7 @@ const LocalGuardianSchema = new Schema<LocalGuardian>({
   address: { type: String, required: true },
 });
 
-const studentSchema = new Schema<Student>({
+const studentSchema = new Schema<TStudent>({
   id: {
     type: String,
     required: true,
@@ -105,4 +106,13 @@ const studentSchema = new Schema<Student>({
   },
 });
 
-export const StudentModel = model<Student>('Student', studentSchema);
+studentSchema.methods.isUserExists = async function (id: string) {
+  const existingUser = await StudentModel.findOne({ id });
+
+  return existingUser;
+};
+
+export const StudentModel = model<TStudent, TStudentModel>(
+  'Student',
+  studentSchema,
+);
