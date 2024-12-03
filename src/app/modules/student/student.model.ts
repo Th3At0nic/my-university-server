@@ -75,7 +75,6 @@ const studentSchema = new Schema<TStudent>({
   password: {
     type: String,
     required: true,
-    unique: true,
     trim: true,
     maxlength: [35, "Password can't have more than 35 characters"],
   },
@@ -123,8 +122,9 @@ studentSchema.pre('save', async function () {
   );
 });
 
-studentSchema.post('save', async function () {
-  console.log(this, 'post hook: this is after the save');
+studentSchema.post('save', function (doc) {
+  doc.password = '';
+  // console.log(doc, 'this is post hook');
 });
 
 //creating a static method for the student Schema which will be use to query on the db

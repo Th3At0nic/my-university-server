@@ -4,7 +4,6 @@ import studentValidationSchema from './student.validation';
 
 const createStudent = async (req: Request, res: Response) => {
   try {
-    console.log(req.body.student);
     const { student: studentData } = req.body;
 
     const zodParsedData = studentValidationSchema.parse(studentData);
