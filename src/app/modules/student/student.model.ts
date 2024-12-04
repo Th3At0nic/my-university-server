@@ -116,9 +116,18 @@ const studentSchema = new Schema<TStudent>({
     type: Boolean,
     default: false,
   },
+},{
+  toJSON: {
+    virtuals: true
+  }
 });
 
-//creating or using mongoose middlewear like pre and post
+//creating mongoose virtual to derive property by computing
+studentSchema.virtual('fullName').get(function () {
+  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+});
+
+//creating or using mongoose middleware like pre and post
 studentSchema.pre('save', async function () {
   this.password = await bcrypt.hash(
     this.password,
@@ -140,14 +149,6 @@ studentSchema.pre('aggregate', function () {
 studentSchema.pre('findOne', function () {
   this.findOne({ isDeleted: { $ne: true } });
 });
-
-// studentSchema.pre('updateOne', async function (id) {
-//   console.log(id);
-//   const userFound = await StudentModel.findOne({ id });
-//   if (!userFound) {
-//     throw new Error('Student with the id now found rahat!');
-//   }
-// });
 
 // hiding the password from the response document to keep the privacy.
 studentSchema.post('save', function (doc) {

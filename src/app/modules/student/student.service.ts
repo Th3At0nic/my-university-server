@@ -31,7 +31,7 @@ const getSingleStudentFromDB = async (id: string) => {
 
   // const result = await StudentModel.aggregate([{ $match: { id: id } }]);
 
-  // this job can be done with both findOne and aggregate, so commented out any one!. remember, each process needs dedicated code block in the model (mongoose middlewear)
+  // this job can be done with both findOne and aggregate, so commented out any one!. remember, each process needs dedicated code block in the model (mongoose middleware)
   return result;
 };
 
