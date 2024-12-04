@@ -28,6 +28,15 @@ const getAllStudentsFromDB = async () => {
 
 const getSingleStudentFromDB = async (id: string) => {
   const result = await StudentModel.findOne({ id }); //built-in static methods of mongoose
+
+  // const result = await StudentModel.aggregate([{ $match: { id: id } }]);
+
+  // this job can be done with both findOne and aggregate, so commented out any one!. remember, each process needs dedicated code block in the model (mongoose middlewear)
+  return result;
+};
+
+const deleteStudentFromDB = async (id: string) => {
+  const result = await StudentModel.updateOne({ id }, { isDeleted: true });
   return result;
 };
 
@@ -35,4 +44,5 @@ export const studentService = {
   createStudentIntoDB,
   getAllStudentsFromDB,
   getSingleStudentFromDB,
+  deleteStudentFromDB,
 };

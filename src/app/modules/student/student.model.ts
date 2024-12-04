@@ -112,6 +112,10 @@ const studentSchema = new Schema<TStudent>({
     enum: ['active', 'blocked'],
     default: 'active',
   },
+  isDeleted: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 //creating or using mongoose middlewear like pre and post
@@ -122,9 +126,32 @@ studentSchema.pre('save', async function () {
   );
 });
 
+// hiding the deleted students to the user end by filtering
+studentSchema.pre('find', function () {
+  this.find({ isDeleted: { $ne: true } });
+});
+
+// this is also same: hiding the delted data to the client if searched, but this specailly work for aggregate method if used in the service
+studentSchema.pre('aggregate', function () {
+  this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
+});
+
+//hiding the deleted student to the client if the client search student by the id which is deleted earlier
+studentSchema.pre('findOne', function () {
+  this.findOne({ isDeleted: { $ne: true } });
+});
+
+// studentSchema.pre('updateOne', async function (id) {
+//   console.log(id);
+//   const userFound = await StudentModel.findOne({ id });
+//   if (!userFound) {
+//     throw new Error('Student with the id now found rahat!');
+//   }
+// });
+
+// hiding the password from the response document to keep the privacy.
 studentSchema.post('save', function (doc) {
   doc.password = '';
-  // console.log(doc, 'this is post hook');
 });
 
 //creating a static method for the student Schema which will be use to query on the db
