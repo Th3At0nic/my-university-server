@@ -9,6 +9,8 @@ router.get('/', studentController.getAllStudents);
 
 router.get('/:id', studentController.getSingleStudent);
 
+// router.put('/:id', studentController.updateStudent); //update feature doesnt work right now, so commented out
+
 router.delete('/:id', studentController.deleteStudent);
 
 export const studentRoute = router;

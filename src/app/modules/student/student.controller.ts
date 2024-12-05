@@ -61,6 +61,27 @@ const getSingleStudent = async (req: Request, res: Response) => {
   }
 };
 
+// this update section does not work as expected, need to fix the issue, will do later
+// const updateStudent = async (req: Request, res: Response) => {
+//   try {
+//     const { id } = req.params;
+//     const updateData = req.body;
+//     const validatedData = studentValidationSchema.parse(updateData);
+//     const result = studentService.updateStudentIntoDB(id, validatedData);
+//     res.status(200).json({
+//       success: true,
+//       message: `Student data with id: ${id} is updated successfully`,
+//       data: result,
+//     });
+//   } catch (err) {
+//     res.status(500).json({
+//       success: false,
+//       message: (err as Error).message || 'Something went wrong!',
+//       error: err,
+//     });
+//   }
+// };
+
 const deleteStudent = async (req: Request, res: Response) => {
   try {
     const { id } = req.params;
@@ -83,5 +104,6 @@ export const studentController = {
   createStudent,
   getAllStudents,
   getSingleStudent,
+  // updateStudent,
   deleteStudent,
 };

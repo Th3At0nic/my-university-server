@@ -35,6 +35,17 @@ const getSingleStudentFromDB = async (id: string) => {
   return result;
 };
 
+// update section code doesnot work now, need to fix later
+// const updateStudentIntoDB = async (
+//   id: string,
+//   updateData: Partial<TStudent>,
+// ) => {
+//   const result = StudentModel.updateOne({ id }, updateData, {
+//     runValidators: true,
+//   });
+//   return result;
+// };
+
 const deleteStudentFromDB = async (id: string) => {
   const result = await StudentModel.updateOne({ id }, { isDeleted: true });
   return result;
@@ -44,5 +55,6 @@ export const studentService = {
   createStudentIntoDB,
   getAllStudentsFromDB,
   getSingleStudentFromDB,
+  // updateStudentIntoDB,
   deleteStudentFromDB,
 };
