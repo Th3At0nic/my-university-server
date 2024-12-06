@@ -5,7 +5,7 @@ const userNameValidationSchema = z.object({
   firstName: z
     .string()
     .trim()
-    .max(20, "First name can't have more than 20 characters")
+    .max(20, { message: "First name can't have more than 20 characters" })
     .refine(
       (value) => {
         const firstNameStr = value.charAt(0).toUpperCase() + value.slice(1);
@@ -16,27 +16,33 @@ const userNameValidationSchema = z.object({
   middleName: z
     .string()
     .trim()
-    .max(20, "Middle name can't have more than 20 characters")
+    .max(20, { message: "Middle name can't have more than 20 characters" })
     .optional(),
   lastName: z
     .string()
     .trim()
-    .max(20, "Last name can't have more than 20 characters"),
+    .max(20, { message: "Last name can't have more than 20 characters" }),
 });
 
 // Validation for Guardian
 const guardianValidationSchema = z.object({
-  fatherName: z.string().max(50, "Name can't have more than 50 characters"),
+  fatherName: z
+    .string()
+    .max(50, { message: "Name can't have more than 50 characters" }),
   fatherOccupation: z.string(),
   fatherContact: z.string(),
-  motherName: z.string().max(50, "Name can't have more than 50 characters"),
+  motherName: z
+    .string()
+    .max(50, { message: "Name can't have more than 50 characters" }),
   motherOccupation: z.string(),
   motherContact: z.string(),
 });
 
 // Validation for LocalGuardian
 const localGuardianValidationSchema = z.object({
-  name: z.string().max(50, "Name can't have more than 50 characters"),
+  name: z
+    .string()
+    .max(50, { message: "Name can't have more than 50 characters" }),
   occupation: z.string(),
   contactNo: z.string(),
   address: z.string(),
@@ -44,11 +50,14 @@ const localGuardianValidationSchema = z.object({
 
 // Validation for Student
 const studentValidationSchema = z.object({
-  id: z.string().trim().max(15, "ID can't have more than 15 characters"),
+  id: z
+    .string()
+    .trim()
+    .max(15, { message: "ID can't have more than 15 characters" }),
   password: z
     .string()
     .trim()
-    .max(35, "Password can't have more than 35 characters"),
+    .max(35, { message: "Password can't have more than 35 characters" }),
   name: userNameValidationSchema,
   gender: z.enum(['male', 'female', 'others'], {
     errorMap: () => ({
