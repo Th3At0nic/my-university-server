@@ -66,6 +66,12 @@ const studentSchema = new Schema<TStudent>(
       trim: true,
       maxlength: [15, "id can't have more than 15 characters"],
     },
+    user: {
+      type: Schema.Types.ObjectId,
+      required: true,
+      unique: true,
+      ref: 'User',
+    },
     password: {
       type: String,
       required: true,
@@ -101,11 +107,6 @@ const studentSchema = new Schema<TStudent>(
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: LocalGuardianSchema },
     profileImg: { type: String },
-    isActive: {
-      type: String,
-      enum: ['active', 'blocked'],
-      default: 'active',
-    },
     isDeleted: {
       type: Boolean,
       default: false,

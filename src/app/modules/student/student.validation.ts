@@ -54,6 +54,12 @@ const studentValidationSchema = z.object({
     .string()
     .trim()
     .max(15, { message: "ID can't have more than 15 characters" }),
+  user: z
+    .string()
+    .length(24, { message: 'Invalid ObjectId length; must be 24 characters.' })
+    .regex(/^[a-fA-F0-9]{24}$/, {
+      message: 'Invalid ObjectId format; must be a hexadecimal string.',
+    }),
   password: z
     .string()
     .trim()
@@ -76,7 +82,6 @@ const studentValidationSchema = z.object({
   guardian: guardianValidationSchema,
   localGuardian: localGuardianValidationSchema.optional(),
   profileImg: z.string().optional(),
-  isActive: z.enum(['active', 'blocked']).default('active'),
   isDeleted: z.boolean().default(false),
 });
 
