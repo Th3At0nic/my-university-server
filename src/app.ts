@@ -1,9 +1,10 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cors from 'cors';
-import express, { Application, Request, Response, NextFunction } from 'express';
+import express, { Application, Request, Response } from 'express';
 import { studentRoute } from './app/modules/student/student.route';
 import { userRoute } from './app/modules/user/user.route';
+import { globalErrorHandler } from './app/middlewares/globalErrorHandler';
 
 const app: Application = express();
 
@@ -20,13 +21,6 @@ app.get('/', (req: Request, res: Response) => {
 });
 
 //this is the global error handler
-// eslint-disable-next-line no-unused-vars
-app.use((err: any, req: Request, res: Response, next: NextFunction) => {
-  res.status(500).json({
-    success: false,
-    message: err.message || 'Something went wrong!',
-    error: err,
-  });
-});
+app.use(globalErrorHandler);
 
 export default app;
