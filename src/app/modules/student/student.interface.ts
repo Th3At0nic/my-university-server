@@ -27,7 +27,7 @@ export type TUserName = {
 export type TStudent = {
   id: string;
   user: Types.ObjectId;
-  password: string;
+  // password: string;
   name: TUserName;
   gender: 'male' | 'female' | 'others';
   dateOfBirth: string;

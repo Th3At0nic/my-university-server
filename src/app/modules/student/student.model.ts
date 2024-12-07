@@ -6,8 +6,6 @@ import {
   TLocalGuardian,
   IStudent,
 } from './student.interface';
-import bcrypt from 'bcrypt';
-import config from '../../config';
 
 const userNameSchema = new Schema<TUserName>({
   firstName: {
@@ -72,12 +70,12 @@ const studentSchema = new Schema<TStudent>(
       unique: true,
       ref: 'User',
     },
-    password: {
-      type: String,
-      required: true,
-      trim: true,
-      maxlength: [35, "Password can't have more than 35 characters"],
-    },
+    // password: {
+    //   type: String,
+    //   required: true,
+    //   trim: true,
+    //   maxlength: [35, "Password can't have more than 35 characters"],
+    // },
     name: {
       type: userNameSchema,
       required: true,
@@ -124,14 +122,6 @@ studentSchema.virtual('fullName').get(function () {
   return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
 });
 
-//creating or using mongoose middleware like pre and post
-studentSchema.pre('save', async function () {
-  this.password = await bcrypt.hash(
-    this.password,
-    Number(config.bcrypt_round_salt),
-  );
-});
-
 // hiding the deleted students to the user end by filtering
 studentSchema.pre('find', function () {
   this.find({ isDeleted: { $ne: true } });
@@ -145,11 +135,6 @@ studentSchema.pre('aggregate', function () {
 //hiding the deleted student to the client if the client search student by the id which is deleted earlier
 studentSchema.pre('findOne', function () {
   this.findOne({ isDeleted: { $ne: true } });
-});
-
-// hiding the password from the response document to keep the privacy.
-studentSchema.post('save', function (doc) {
-  doc.password = '';
 });
 
 //creating a static method for the student Schema which will be use to query on the db

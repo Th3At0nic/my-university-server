@@ -60,10 +60,10 @@ const studentValidationSchema = z.object({
     .regex(/^[a-fA-F0-9]{24}$/, {
       message: 'Invalid ObjectId format; must be a hexadecimal string.',
     }),
-  password: z
-    .string()
-    .trim()
-    .max(35, { message: "Password can't have more than 35 characters" }),
+  // password: z
+  //   .string()
+  //   .trim()
+  //   .max(35, { message: "Password can't have more than 35 characters" }),
   name: userNameValidationSchema,
   gender: z.enum(['male', 'female', 'others'], {
     errorMap: () => ({

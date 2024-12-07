@@ -1,7 +1,11 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { studentService } from './student.service';
 
-const getAllStudents = async (req: Request, res: Response) => {
+const getAllStudents = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await studentService.getAllStudentsFromDB();
     res.status(200).json({
@@ -10,16 +14,15 @@ const getAllStudents = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: (err as Error).message || 'Something went wrong!',
-      error: err,
-    });
-    console.log(err);
+    next(err);
   }
 };
 
-const getSingleStudent = async (req: Request, res: Response) => {
+const getSingleStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await studentService.getSingleStudentFromDB(id);
@@ -29,37 +32,15 @@ const getSingleStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: (err as Error).message || 'Something went wrong!',
-      error: err,
-    });
-    console.log(err);
+    next(err);
   }
 };
 
-// this update section does not work as expected, need to fix the issue, will do later
-// const updateStudent = async (req: Request, res: Response) => {
-//   try {
-//     const { id } = req.params;
-//     const updateData = req.body;
-//     const validatedData = studentValidationSchema.parse(updateData);
-//     const result = studentService.updateStudentIntoDB(id, validatedData);
-//     res.status(200).json({
-//       success: true,
-//       message: `Student data with id: ${id} is updated successfully`,
-//       data: result,
-//     });
-//   } catch (err) {
-//     res.status(500).json({
-//       success: false,
-//       message: (err as Error).message || 'Something went wrong!',
-//       error: err,
-//     });
-//   }
-// };
-
-const deleteStudent = async (req: Request, res: Response) => {
+const deleteStudent = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { id } = req.params;
     const result = await studentService.deleteStudentFromDB(id);
@@ -69,17 +50,12 @@ const deleteStudent = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (err) {
-    res.status(500).json({
-      success: false,
-      message: (err as Error).message || 'Something went wrong!',
-      error: err,
-    });
+    next(err);
   }
 };
 
 export const studentController = {
   getAllStudents,
   getSingleStudent,
-  // updateStudent,
   deleteStudent,
 };

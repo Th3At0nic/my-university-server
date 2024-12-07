@@ -1,5 +1,7 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import cors from 'cors';
-import express, { Application, Request, Response } from 'express';
+import express, { Application, Request, Response, NextFunction } from 'express';
 import { studentRoute } from './app/modules/student/student.route';
 import { userRoute } from './app/modules/user/user.route';
 
@@ -17,6 +19,14 @@ app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
 });
 
-console.log('here is:', process.cwd());
+//this is the global error handler
+// eslint-disable-next-line no-unused-vars
+app.use((err: any, req: Request, res: Response, next: NextFunction) => {
+  res.status(500).json({
+    success: false,
+    message: err.message || 'Something went wrong!',
+    error: err,
+  });
+});
 
 export default app;
