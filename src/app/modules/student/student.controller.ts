@@ -1,5 +1,6 @@
 import { NextFunction, Request, Response } from 'express';
 import { studentService } from './student.service';
+import sendResponse from '../../utils/sendResponse';
 
 const getAllStudents = async (
   req: Request,
@@ -8,11 +9,15 @@ const getAllStudents = async (
 ) => {
   try {
     const result = await studentService.getAllStudentsFromDB();
-    res.status(200).json({
-      success: true,
-      message: 'Students is retrieved successfully!',
-      data: result,
-    });
+
+    const message = 'Successfully retrieved students!';
+
+    sendResponse(res, message, result);
+    // res.status(200).json({
+    //   success: true,
+    //   message: 'Students is retrieved successfully!',
+    //   data: result,
+    // });
   } catch (err) {
     next(err);
   }
@@ -26,11 +31,9 @@ const getSingleStudent = async (
   try {
     const { id } = req.params;
     const result = await studentService.getSingleStudentFromDB(id);
-    res.status(200).json({
-      success: true,
-      message: `The student with id ${id} is found!`,
-      data: result,
-    });
+
+    const message = 'Successfully retrieved the student!';
+    sendResponse(res, message, result);
   } catch (err) {
     next(err);
   }

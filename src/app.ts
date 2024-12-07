@@ -2,10 +2,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
-import { studentRoute } from './app/modules/student/student.route';
-import { userRoute } from './app/modules/user/user.route';
 import { globalErrorHandler } from './app/middlewares/globalErrorHandler';
 import { notFound } from './app/middlewares/notFound';
+import router from './app/routes';
 
 const app: Application = express();
 
@@ -14,8 +13,8 @@ app.use(express.json());
 //cors
 app.use(cors());
 
-app.use('/api/v1/students', studentRoute);
-app.use('/api/v1/users/', userRoute);
+//routing to the router folder
+app.use('/api/v1/', router);
 
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
