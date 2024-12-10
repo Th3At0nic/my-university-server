@@ -50,39 +50,32 @@ const localGuardianValidationSchema = z.object({
 
 // Validation for Student
 const studentValidationSchema = z.object({
-  id: z
-    .string()
-    .trim()
-    .max(15, { message: "ID can't have more than 15 characters" }),
-  user: z
-    .string()
-    .length(24, { message: 'Invalid ObjectId length; must be 24 characters.' })
-    .regex(/^[a-fA-F0-9]{24}$/, {
-      message: 'Invalid ObjectId format; must be a hexadecimal string.',
-    }),
-  // password: z
-  //   .string()
-  //   .trim()
-  //   .max(35, { message: "Password can't have more than 35 characters" }),
-  name: userNameValidationSchema,
-  gender: z.enum(['male', 'female', 'others'], {
-    errorMap: () => ({
-      message: "Gender can be only 'male', 'female' or 'others'",
+  body: z.object({
+    password: z
+      .string()
+      .trim()
+      .max(35, { message: "Password can't have more than 35 characters" }),
+    student: z.object({
+      name: userNameValidationSchema,
+      gender: z.enum(['male', 'female', 'others'], {
+        errorMap: () => ({
+          message: "Gender can be only 'male', 'female' or 'others'",
+        }),
+      }),
+      dateOfBirth: z.string(),
+      email: z.string().email(),
+      contactNo: z.string(),
+      emergencyContactNo: z.string(),
+      bloodGroup: z
+        .enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
+        .optional(),
+      presentAddress: z.string(),
+      permanentAddress: z.string(),
+      guardian: guardianValidationSchema,
+      localGuardian: localGuardianValidationSchema.optional(),
+      profileImg: z.string().optional(),
     }),
   }),
-  dateOfBirth: z.string(),
-  email: z.string().email(),
-  contactNo: z.string(),
-  emergencyContactNo: z.string(),
-  bloodGroup: z
-    .enum(['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'])
-    .optional(),
-  presentAddress: z.string(),
-  permanentAddress: z.string(),
-  guardian: guardianValidationSchema,
-  localGuardian: localGuardianValidationSchema.optional(),
-  profileImg: z.string().optional(),
-  isDeleted: z.boolean().default(false),
 });
 
 export default studentValidationSchema;

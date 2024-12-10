@@ -70,12 +70,6 @@ const studentSchema = new Schema<TStudent>(
       unique: true,
       ref: 'User',
     },
-    // password: {
-    //   type: String,
-    //   required: true,
-    //   trim: true,
-    //   maxlength: [35, "Password can't have more than 35 characters"],
-    // },
     name: {
       type: userNameSchema,
       required: true,
@@ -105,10 +99,6 @@ const studentSchema = new Schema<TStudent>(
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: LocalGuardianSchema },
     profileImg: { type: String },
-    isDeleted: {
-      type: Boolean,
-      default: false,
-    },
   },
   {
     toJSON: {

@@ -1,3 +1,6 @@
+/* eslint-disable no-unused-vars */
+import { Model } from 'mongoose';
+
 export type TUser = {
   id: string;
   password: string;
@@ -7,8 +10,6 @@ export type TUser = {
   isDeleted: boolean;
 };
 
-// export type NewUser = {
-//   password: string;
-//   role: string;
-//   id: string;
-// };
+export interface IUser extends Model<TUser> {
+  isUserExists(id: string): Promise<TUser | null>;
+}

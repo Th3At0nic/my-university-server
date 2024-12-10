@@ -1,11 +1,11 @@
 import { model, Schema } from 'mongoose';
-import { TUser } from './user.interface';
+import { IUser, TUser } from './user.interface';
 import bcrypt from 'bcrypt';
 import config from '../../config';
 
 export const userSchema = new Schema<TUser>(
   {
-    id: { type: String, required: true },
+    id: { type: String, required: true, unique: true },
     password: { type: String, required: true },
     needsPasswordChange: { type: Boolean, required: true, default: true },
     role: {
@@ -39,4 +39,10 @@ userSchema.post('save', function (doc) {
   doc.password = '';
 });
 
-export const UserModel = model<TUser>('User', userSchema);
+//finding for existing user in the db so prevent duplicate creation
+userSchema.statics.isUserExists = async function (id: string) {
+  const existingUser = await UserModel.findOne({ id });
+  return existingUser;
+};
+
+export const UserModel = model<TUser, IUser>('User', userSchema);

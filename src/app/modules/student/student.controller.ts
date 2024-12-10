@@ -30,11 +30,9 @@ const deleteStudent = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const result = await studentService.deleteStudentFromDB(id);
-    res.status(200).json({
-      success: true,
-      message: '204 No Content, Deleted Successfully.',
-      data: result,
-    });
+
+    const message = 'Deleted the student successfully.';
+    sendResponse(res, message, result);
   },
 );
 

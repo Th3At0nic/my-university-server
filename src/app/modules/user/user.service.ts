@@ -8,9 +8,14 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const user: Partial<TUser> = {
     password: password || (config.default_password as string),
     role: 'student',
-    id: '2030100001',
+    id: '2030100002',
   };
 
+  //preventing duplicate creation of student
+  const userExisted = await UserModel.isUserExists(user.id as string);
+  if (userExisted) {
+    throw new Error('The user existed already!');
+  }
   //creating a new user
   const newUser = await UserModel.create(user);
 
@@ -19,11 +24,15 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     studentData.user = newUser._id;
 
     //creating a new student
-    const newStudent = await StudentModel.create(studentData);
+    const newStudent = await StudentModel.create({
+      ...studentData,
+      password,
+    });
     return newStudent;
   }
 
   return 'Something went wrong while creating a new User using UserModel!';
+
   //creating a static methods for interacting with the db with model before creating/saving into the db
   // if (await StudentModel.isUserExists(studentData.id)) {
   //   throw new Error('User already exists!');
