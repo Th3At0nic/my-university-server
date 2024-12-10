@@ -12,11 +12,10 @@ export type TMonth =
   | 'November'
   | 'December';
 
-export type TSemester = {
-  _id: string;
-  name: string;
+export type TAcademicSemester = {
+  name: 'Autumn' | 'Summer' | 'Fall';
+  code: '01' | '02' | '03';
   year: Date;
-  code: number;
   startMonth: TMonth;
   endMonth: TMonth;
 };
