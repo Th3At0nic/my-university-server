@@ -8,7 +8,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const user: Partial<TUser> = {
     password: password || (config.default_password as string),
     role: 'student',
-    id: '2030100002',
+    id: '2030100001',
   };
 
   //preventing duplicate creation of student

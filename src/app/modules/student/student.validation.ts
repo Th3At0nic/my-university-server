@@ -62,7 +62,12 @@ const studentValidationSchema = z.object({
           message: "Gender can be only 'male', 'female' or 'others'",
         }),
       }),
-      dateOfBirth: z.string(),
+      dateOfBirth: z
+        .string()
+        .refine((val) => !isNaN(Date.parse(val)), {
+          message: 'Invalid date format',
+        })
+        .transform((val) => new Date(val)),
       email: z.string().email(),
       contactNo: z.string(),
       emergencyContactNo: z.string(),
