@@ -1,28 +1,18 @@
 import { z } from 'zod';
-
-const monthsEnum = z.enum([
-  'january',
-  'february',
-  'march',
-  'april',
-  'may',
-  'june',
-  'july',
-  'august',
-  'september',
-  'october',
-  'november',
-  'december',
-]);
+import {
+  academicSemesterCode,
+  academicSemesterName,
+  months,
+} from './academicSemester.constants';
 
 export const createAcademicSemesterValidation = z.object({
   body: z.object({
-    name: z.enum(['Autumn', 'Summer', 'Fall'], {
+    name: z.enum(academicSemesterName as [string, ...string[]], {
       errorMap: () => ({
         message: "Name must be one of 'Autumn', 'Summer', or 'Fall'.",
       }),
     }),
-    code: z.enum(['01', '02', '03'], {
+    code: z.enum(academicSemesterCode as [string, ...string[]], {
       errorMap: () => ({ message: "Code must be one of '01', '02', or '03'." }),
     }),
     year: z.preprocess(
@@ -31,7 +21,7 @@ export const createAcademicSemesterValidation = z.object({
         errorMap: () => ({ message: 'Year must be a valid date.' }),
       }),
     ),
-    startMonth: monthsEnum,
-    endMonth: monthsEnum,
+    startMonth: z.enum(months as [string, ...string[]]),
+    endMonth: z.enum(months as [string, ...string[]]),
   }),
 });
