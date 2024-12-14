@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import config from '../../config';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
@@ -6,33 +7,55 @@ import { UserModel } from './user.model';
 import { generateNewStudentId } from './user.utils';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
-  const user: Partial<TUser> = {
-    password: password || (config.default_password as string),
-    role: 'student',
-    id: await generateNewStudentId(studentData),
-  };
+  // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
+  const session = await mongoose.startSession();
 
-  //preventing duplicate creation of student
-  const userExisted = await UserModel.isUserExists(user.id as string);
-  if (userExisted) {
-    throw new Error('The user existed already!');
-  }
-  //creating a new user
-  const newUser = await UserModel.create(user);
+  try {
+    session.startTransaction(); // starting the session for transaction
 
-  if (Object.keys(newUser).length) {
-    //student id format : year/semesterCode/id
-    studentData.id = newUser.id;
-    // studentData.id = generateId(studentData);
+    const user: Partial<TUser> = {
+      password: password || (config.default_password as string),
+      role: 'student',
+      id: await generateNewStudentId(studentData),
+    };
 
-    studentData.user = newUser._id;
+    //preventing duplicate creation of student
+    const userExisted = await UserModel.isUserExists(user.id as string);
+    if (userExisted) {
+      throw new Error('The user existed already!');
+    }
+    //creating a new user
+    const newUser = await UserModel.create([user], { session });
 
-    //creating a new student
-    const newStudent = await StudentModel.create({
-      ...studentData,
-      password,
-    });
-    return newStudent;
+    if (newUser.length) {
+      //student id format : year/semesterCode/id
+      studentData.id = newUser[0].id;
+      // studentData.id = generateId(studentData);
+
+      studentData.user = newUser[0]._id;
+
+      //creating a new student
+      const newStudent = await StudentModel.create(
+        [
+          {
+            ...studentData,
+            password,
+          },
+        ],
+        { session },
+      );
+
+      await session.commitTransaction();
+
+      return newStudent;
+    }
+  } catch (err) {
+    await session.abortTransaction();
+    throw new Error(
+      (err as Error).message || 'Failed to create User and Student',
+    );
+  } finally {
+    session.endSession();
   }
 
   return 'Something went wrong while creating a new User using UserModel!';
