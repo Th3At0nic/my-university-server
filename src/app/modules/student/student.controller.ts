@@ -10,6 +10,10 @@ const getAllStudents = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const result = await studentService.getAllStudentsFromDB();
 
+    // if (!result.length) {
+    //   throw new Error('No Student found.');
+    // }
+
     const message = 'Successfully retrieved students!';
 
     sendResponse(res, message, result);
@@ -21,6 +25,10 @@ const getSingleStudent = catchAsync(
     const { id } = req.params;
     const result = await studentService.getSingleStudentFromDB(id);
 
+    // if (!result) {
+    //   throw new Error(`Student not found with id: ${id}`);
+    // }
+
     const message = 'Successfully retrieved the student!';
     sendResponse(res, message, result);
   },
@@ -30,6 +38,10 @@ const deleteStudent = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
     const { id } = req.params;
     const result = await studentService.deleteStudentFromDB(id);
+
+    // if (!result) {
+    //   throw new Error(`Student not found or not deleted with id: ${id}`);
+    // }
 
     const message = 'Deleted the student successfully.';
     sendResponse(res, message, result);

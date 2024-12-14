@@ -32,3 +32,5 @@ export const semesterCodeNameMapper: TSemesterCodeName = {
   Summer: '02',
   Fall: '03',
 };
+
+export const currentYear = new Date().getFullYear();

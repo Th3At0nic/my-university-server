@@ -10,7 +10,14 @@ export const academicSemesterSchema = new Schema<TAcademicSemester>(
   {
     name: { type: String, enum: academicSemesterName, required: true },
     code: { type: String, enum: academicSemesterCode, required: true },
-    year: { type: Date, required: true },
+    year: {
+      type: String,
+      required: true,
+      validate: {
+        validator: (value: string) => /^\d{4}$/.test(value), // Validates a 4-digit year
+        message: 'Year must be a 4-digit number',
+      },
+    },
     startMonth: {
       type: String,
       enum: months,

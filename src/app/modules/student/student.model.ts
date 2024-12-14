@@ -62,7 +62,7 @@ const studentSchema = new Schema<TStudent>(
       required: true,
       unique: true,
       trim: true,
-      maxlength: [15, "id can't have more than 15 characters"],
+      maxlength: [40, "id can't have more than 40 characters"],
     },
     user: {
       type: Schema.Types.ObjectId,
@@ -98,6 +98,7 @@ const studentSchema = new Schema<TStudent>(
     permanentAddress: { type: String, required: true },
     guardian: { type: guardianSchema, required: true },
     localGuardian: { type: LocalGuardianSchema },
+    admissionSemester: Schema.Types.ObjectId,
     profileImg: { type: String },
   },
   {

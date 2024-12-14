@@ -3,12 +3,13 @@ import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
 import { TUser } from './user.interface';
 import { UserModel } from './user.model';
+import { generateNewStudentId } from './user.utils';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const user: Partial<TUser> = {
     password: password || (config.default_password as string),
     role: 'student',
-    id: '2030100001',
+    id: await generateNewStudentId(studentData),
   };
 
   //preventing duplicate creation of student
@@ -20,7 +21,10 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   const newUser = await UserModel.create(user);
 
   if (Object.keys(newUser).length) {
+    //student id format : year/semesterCode/id
     studentData.id = newUser.id;
+    // studentData.id = generateId(studentData);
+
     studentData.user = newUser._id;
 
     //creating a new student
