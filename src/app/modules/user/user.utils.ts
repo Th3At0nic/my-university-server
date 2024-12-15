@@ -20,11 +20,21 @@ export const generateNewStudentId = async (studentData: TStudent) => {
     createdAt: -1,
   });
 
-  if (lastStudent) {
+  const lastStudentSemesterYear = lastStudent?.id.slice(0, 4);
+  const lastStudentSemesterCode = lastStudent?.id.slice(4, 6);
+
+  //if the year and semester is new, then id will be new, or will maintain previous id serial
+  if (
+    lastStudentSemesterYear === semesterData?.year &&
+    lastStudentSemesterCode === semesterData?.code
+  ) {
     const LastStudentIdSlice = lastStudent?.id.slice(-4);
     const newStudentId = Number(LastStudentIdSlice) + 1;
+
     const assembleNewStudentId =
-      lastStudent?.id.slice(0, 6) + newStudentId.toString().padStart(4, '0');
+      lastStudentSemesterYear +
+      lastStudentSemesterCode +
+      newStudentId.toString().padStart(4, '0');
 
     return assembleNewStudentId;
   }
