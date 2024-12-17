@@ -45,9 +45,22 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
         { session },
       );
 
+      //this block of code is responsible for providing response data with populated admissionSemester and academicDepartment document
+      const populatedNewStudent = await StudentModel.findById([
+        newStudent[0]._id,
+      ])
+        .populate('admissionSemester')
+        .populate({
+          path: 'academicDepartment',
+          populate: {
+            path: 'academicFaculty',
+          },
+        })
+        .session(session);
+
       await session.commitTransaction();
 
-      return newStudent;
+      return populatedNewStudent;
     }
   } catch (err) {
     await session.abortTransaction();
