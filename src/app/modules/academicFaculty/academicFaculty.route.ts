@@ -11,4 +11,14 @@ router.post(
   AcademicFacultyControllers.createAcademicFaculty,
 );
 
+router.get('/', AcademicFacultyControllers.getAllAcademicFaculty);
+
+router.get('/:id', AcademicFacultyControllers.getAnAcademicFaculty);
+
+router.patch(
+  '/:id',
+  validateRequest(AcademicFacultyValidation),
+  AcademicFacultyControllers.updateAnAcademicFaculty,
+);
+
 export const AcademicFacultyRoute = router;

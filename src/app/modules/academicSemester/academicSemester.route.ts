@@ -18,7 +18,7 @@ router.get('/', AcademicSemesterControllers.getAllAcademicSemester);
 
 router.get('/:id', AcademicSemesterControllers.getAnAcademicSemester);
 
-router.put(
+router.patch(
   '/:id',
   validateRequest(updateAcademicSemesterValidation),
   AcademicSemesterControllers.updateAnAcademicSemester,
