@@ -7,12 +7,12 @@ const createAcademicDepartmentIntoDB = async (data: TAcademicDepartment) => {
 };
 
 const getAllAcademicDepartmentFromDB = async () => {
-  const result = await DepartmentModel.find();
+  const result = await DepartmentModel.find().populate('academicFaculty');
   return result;
 };
 
 const getAnAcademicDepartmentFromDB = async (id: string) => {
-  const result = await DepartmentModel.findById(id);
+  const result = await DepartmentModel.findById(id).populate('academicFaculty');
   return result;
 };
 
@@ -22,7 +22,7 @@ const updateAcademicDepartmentIntoDB = async (
 ) => {
   const result = await DepartmentModel.findByIdAndUpdate(id, updateData, {
     new: true,
-  });
+  }).populate('academicFaculty');
   return result;
 };
 
