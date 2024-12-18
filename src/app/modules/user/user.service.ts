@@ -34,6 +34,8 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
 
       studentData.user = newUser[0]._id;
 
+      studentData.isDeleted = newUser[0].isDeleted;
+
       //creating a new student
       const newStudent = await StudentModel.create(
         [
