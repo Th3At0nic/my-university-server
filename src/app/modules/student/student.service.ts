@@ -73,10 +73,6 @@ const deleteStudentFromDB = async (id: string) => {
       { new: true, session },
     );
 
-    // if (!result) {
-    //   throw new NotFoundError(`Student not found with the ${id}`);
-    // }
-
     await session.commitTransaction();
 
     return result;
