@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { NotFoundError } from '../../middlewares/globalErrorHandler';
 import { StudentModel } from './student.model';
 import { UserModel } from '../user/user.model';
+import { TStudent } from './student.interface';
 
 const getAllStudentsFromDB = async () => {
   const result = await StudentModel.find({ isDeleted: false }).populate([
@@ -84,8 +85,49 @@ const deleteStudentFromDB = async (id: string) => {
   }
 };
 
+const updateStudentIntoDB = async (
+  id: string,
+  updatedData: Partial<TStudent>,
+) => {
+  const student = await StudentModel.findOne({ id });
+  if (!student || student.isDeleted) {
+    throw new NotFoundError(
+      `The student you are trying to update (id: ${id}) does not exist or has already been deleted.`,
+    );
+  }
+
+  const { name, guardian, localGuardian, ...remainingData } = updatedData;
+
+  const flattenedData: Record<string, unknown> = { ...remainingData };
+
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      flattenedData[`name.${key}`] = value;
+    }
+  }
+
+  if (guardian && Object.keys(guardian).length) {
+    for (const [key, value] of Object.entries(guardian)) {
+      flattenedData[`guardian.${key}`] = value;
+    }
+  }
+
+  if (localGuardian && Object.keys(localGuardian).length) {
+    for (const [key, value] of Object.entries(localGuardian)) {
+      flattenedData[`localGuardian.${key}`] = value;
+    }
+  }
+
+  const result = await StudentModel.findOneAndUpdate({ id }, flattenedData, {
+    new: true,
+    runValidators: true,
+  });
+  return result;
+};
+
 export const studentService = {
   getAllStudentsFromDB,
   getSingleStudentFromDB,
   deleteStudentFromDB,
+  updateStudentIntoDB,
 };
