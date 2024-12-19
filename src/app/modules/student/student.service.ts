@@ -16,7 +16,12 @@ const getAllStudentsFromDB = async () => {
   ]);
 
   if (!result.length) {
-    throw new NotFoundError('No Student collection found.');
+    throw new NotFoundError('No Student found.', [
+      {
+        path: 'Students Collection',
+        message: 'The student collection could not be found in the system.',
+      },
+    ]);
   }
   return result;
 };
@@ -33,7 +38,12 @@ const getSingleStudentFromDB = async (id: string) => {
   ]);
 
   if (!result) {
-    throw new NotFoundError(`Student not found with the id: ${id}`);
+    throw new NotFoundError(`Student not found!`, [
+      {
+        path: `${id}`,
+        message: `No student found with the provided ID: ${id}. Please check the ID and try again.`,
+      },
+    ]);
   }
 
   // const result = await StudentModel.aggregate([{ $match: { id: id } }]);
@@ -54,9 +64,12 @@ const deleteStudentFromDB = async (id: string) => {
     });
 
     if (!student) {
-      throw new NotFoundError(
-        `The student you are trying to delete (id: ${id}) does not exist or has already been deleted.`,
-      );
+      throw new NotFoundError(`Student not found!`, [
+        {
+          path: `${id}`,
+          message: `No student found with the provided ID: ${id}. Please check the ID and try again.`,
+        },
+      ]);
     }
 
     await UserModel.findOneAndUpdate(
@@ -91,9 +104,12 @@ const updateStudentIntoDB = async (
 ) => {
   const student = await StudentModel.findOne({ id });
   if (!student || student.isDeleted) {
-    throw new NotFoundError(
-      `The student you are trying to update (id: ${id}) does not exist or has already been deleted.`,
-    );
+    throw new NotFoundError(`Student not found!`, [
+      {
+        path: `${id}`,
+        message: `No student found with the provided ID: ${id}. Please check the ID and try again.`,
+      },
+    ]);
   }
 
   const { name, guardian, localGuardian, ...remainingData } = updatedData;
