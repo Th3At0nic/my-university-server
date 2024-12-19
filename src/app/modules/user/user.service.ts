@@ -70,14 +70,15 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
 
       return populatedNewStudent;
     }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
     if (err.code === 11000) {
       throw new ConflictError('Failed to create User and Student.', [
         {
-          path: 'Failed to create User and Student. Please try again.',
-          message: `Failed to process the transaction. Couldn't create user and student!`,
+          path: 'transaction',
+          message:
+            'Failed to process the transaction due to a conflict. Please check your data and try again.',
         },
       ]);
     }

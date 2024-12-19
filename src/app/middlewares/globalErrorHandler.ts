@@ -27,17 +27,35 @@ export const globalErrorHandler: ErrorRequestHandler = (
   next,
 ) => {
   if (err instanceof NotFoundError) {
-    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
+    return sendResponse(
+      res,
+      err.statusCode,
+      false,
+      err.message,
+      err.errorSource,
+    );
     // res.status(err.statusCode).json({ message: err.message });
   }
 
   if (err instanceof ValidationError) {
-    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
+    return sendResponse(
+      res,
+      err.statusCode,
+      false,
+      err.message,
+      err.errorSource,
+    );
     // res.status(err.statusCode).json({ message: err.message });
   }
 
   if (err instanceof ConflictError) {
-    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
+    return sendResponse(
+      res,
+      err.statusCode,
+      false,
+      err.message,
+      err.errorSource,
+    );
   }
 
   res.status(500).json({
