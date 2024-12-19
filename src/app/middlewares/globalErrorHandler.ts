@@ -42,8 +42,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
 
   res.status(500).json({
     success: false,
-    message: err.message || 'Something went wrong!',
+    message: 'Something went wrong!',
     errorSource,
-    // error: err,
   });
 };

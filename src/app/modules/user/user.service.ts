@@ -5,6 +5,7 @@ import { StudentModel } from '../student/student.model';
 import { TUser } from './user.interface';
 import { UserModel } from './user.model';
 import { generateNewStudentId } from './user.utils';
+import { ConflictError } from '../../utils/errors/conflictError';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
@@ -22,7 +23,12 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
     //preventing duplicate creation of student
     const userExisted = await UserModel.isUserExists(user.id as string);
     if (userExisted) {
-      throw new Error('The user existed already!');
+      throw new ConflictError('The user existed already!', [
+        {
+          path: `${user.id}`,
+          message: `The user id: ${user.id} is already registered.`,
+        },
+      ]);
     }
     //creating a new user
     const newUser = await UserModel.create([user], { session });
@@ -64,11 +70,17 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
 
       return populatedNewStudent;
     }
-  } catch (err) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
     await session.abortTransaction();
-    throw new Error(
-      (err as Error).message || 'Failed to create User and Student',
-    );
+    if (err.code === 11000) {
+      throw new ConflictError('Failed to create User and Student.', [
+        {
+          path: 'Failed to create User and Student. Please try again.',
+          message: `Failed to process the transaction. Couldn't create user and student!`,
+        },
+      ]);
+    }
   } finally {
     session.endSession();
   }
