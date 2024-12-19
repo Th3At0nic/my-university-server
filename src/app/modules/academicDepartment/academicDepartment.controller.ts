@@ -11,7 +11,7 @@ const createAcademicDepartment = catchAsync(async (req, res, next) => {
     await AcademicDepartmentServices.createAcademicDepartmentIntoDB(data);
   const message = 'Academic Department is created successfully!';
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 const getAllAcademicDepartment = catchAsync(async (req, res, next) => {
@@ -19,7 +19,7 @@ const getAllAcademicDepartment = catchAsync(async (req, res, next) => {
     await AcademicDepartmentServices.getAllAcademicDepartmentFromDB();
   const message = 'All academic department retrieved successfully!';
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 const getAnAcademicDepartment = catchAsync(async (req, res, next) => {
@@ -28,7 +28,7 @@ const getAnAcademicDepartment = catchAsync(async (req, res, next) => {
     await AcademicDepartmentServices.getAnAcademicDepartmentFromDB(id);
   const message = `Successfully retrieved the academic department with id: ${id}`;
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 const updateAcademicDepartment = catchAsync(async (req, res, next) => {
@@ -41,7 +41,7 @@ const updateAcademicDepartment = catchAsync(async (req, res, next) => {
     );
   const message = 'Updated the academic department successfully';
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 export const AcademicDepartmentControllers = {

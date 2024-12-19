@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
-import { NotFoundError } from '../../middlewares/globalErrorHandler';
 import { StudentModel } from './student.model';
 import { UserModel } from '../user/user.model';
 import { TStudent } from './student.interface';
+import { NotFoundError } from '../../utils/errors/notFoundError';
 
 const getAllStudentsFromDB = async () => {
   const result = await StudentModel.find({ isDeleted: false }).populate([

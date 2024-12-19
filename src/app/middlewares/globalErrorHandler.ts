@@ -1,35 +1,49 @@
+/* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
-import { Request, Response, NextFunction } from 'express';
+import { ErrorRequestHandler } from 'express';
+import { NotFoundError } from '../utils/errors/notFoundError';
+import { ValidationError } from '../utils/errors/validationError';
+import sendResponse from '../utils/sendResponse';
+import { ConflictError } from '../utils/errors/conflictError';
 
-export class NotFoundError extends Error {
-  statusCode: number;
-  constructor(message: string) {
-    super(message);
-    this.statusCode = 404;
-    this.name = 'NotFoundError';
+export type TErrorSource = {
+  path: string | number;
+  message: string;
+}[];
 
-    if (Error.captureStackTrace) {
-      Error.captureStackTrace(this, NotFoundError);
-    }
-  }
-}
+const errorSource: TErrorSource = [
+  {
+    path: '',
+    message: 'Something went wrong',
+  },
+];
 
-export const globalErrorHandler = (
-  err: any,
-  req: Request,
-  res: Response,
-  // eslint-disable-next-line no-unused-vars
-  next: NextFunction,
+export const globalErrorHandler: ErrorRequestHandler = (
+  err,
+  req,
+  res,
+  next,
 ) => {
   if (err instanceof NotFoundError) {
-    res.status(err.statusCode).json({ message: err.message });
+    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
+    // res.status(err.statusCode).json({ message: err.message });
+  }
+
+  if (err instanceof ValidationError) {
+    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
+    // res.status(err.statusCode).json({ message: err.message });
+  }
+
+  if (err instanceof ConflictError) {
+    sendResponse(res, err.statusCode, false, err.message, err.errorSource);
   }
 
   res.status(500).json({
     success: false,
     message: err.message || 'Something went wrong!',
-    error: err,
+    errorSource,
+    // error: err,
   });
 };

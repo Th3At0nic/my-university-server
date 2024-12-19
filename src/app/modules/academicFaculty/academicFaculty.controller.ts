@@ -6,25 +6,25 @@ import { AcademicFacultyServices } from './academicFaculty.service';
 
 const createAcademicFaculty = catchAsync(async (req, res, next) => {
   const data = req.body;
-  const message = 'Successfully created Academic Faculty!';
   const result =
     await AcademicFacultyServices.createAcademicFacultyIntoDB(data);
 
-  sendResponse(res, message, result);
+  const message = 'Successfully created Academic Faculty!';
+  sendResponse(res, 200, true, message, result);
 });
 
 const getAllAcademicFaculty = catchAsync(async (req, res, next) => {
   const result = await AcademicFacultyServices.getAllAcademicFacultyFromDB();
   const message = 'Retrieved all Academic Faculty Successfully!';
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 const getAnAcademicFaculty = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const result = await AcademicFacultyServices.getAnAcademicFacultyFromDB(id);
   const message = `Successfully retrieved the Academic Faculty with id: ${id}`;
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 const updateAnAcademicFaculty = catchAsync(async (req, res, next) => {
@@ -35,7 +35,7 @@ const updateAnAcademicFaculty = catchAsync(async (req, res, next) => {
     updatedData,
   );
   const message = `Successfully Updated the Academic Faculty with id: ${id}`;
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 export const AcademicFacultyControllers = {

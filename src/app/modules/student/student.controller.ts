@@ -12,7 +12,7 @@ const getAllStudents = catchAsync(
 
     const message = 'Successfully retrieved students!';
 
-    sendResponse(res, message, result);
+    sendResponse(res, 200, true, message, result);
   },
 );
 
@@ -22,7 +22,7 @@ const getSingleStudent = catchAsync(
     const result = await studentService.getSingleStudentFromDB(id);
 
     const message = 'Successfully retrieved the student!';
-    sendResponse(res, message, result);
+    sendResponse(res, 200, true, message, result);
   },
 );
 
@@ -34,7 +34,7 @@ const deleteStudent = catchAsync(
     const message = 'Deleted the student successfully.';
 
     if (result) {
-      sendResponse(res, message, null);
+      sendResponse(res, 200, true, message, null);
     }
   },
 );
@@ -47,7 +47,7 @@ const updateStudent = catchAsync(async (req, res, next) => {
 
   const message = 'Updated the student successfully!';
 
-  sendResponse(res, message, result);
+  sendResponse(res, 200, true, message, result);
 });
 
 export const studentController = {

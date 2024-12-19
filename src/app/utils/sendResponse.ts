@@ -1,8 +1,14 @@
 import { Response } from 'express';
 
-const sendResponse = <T>(res: Response, message: string, data: T) => {
-  res.status(200).json({
-    success: true,
+const sendResponse = <T>(
+  res: Response,
+  statusCode: number,
+  success: boolean,
+  message: string,
+  data: T,
+) => {
+  res.status(statusCode).json({
+    success: success,
     message: message,
     data: data,
   });
