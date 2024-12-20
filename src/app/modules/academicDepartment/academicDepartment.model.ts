@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { TAcademicDepartment } from './academicDepartment.interface';
+import { ConflictError } from '../../utils/errors/conflictError';
 
 const academicDepartmentSchema = new Schema<TAcademicDepartment>(
   {
@@ -13,7 +14,12 @@ academicDepartmentSchema.pre('save', async function () {
   const isDepartmentExists = await DepartmentModel.findOne({ name: this.name });
 
   if (isDepartmentExists) {
-    throw new Error('This department is already exists!');
+    throw new ConflictError('This department is already exists!', [
+      {
+        path: `${this.name}`,
+        message: `${this.name} is already exists in the system`,
+      },
+    ]);
   }
 });
 

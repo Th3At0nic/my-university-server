@@ -5,6 +5,7 @@ import {
   academicSemesterName,
   months,
 } from './academicSemester.constants';
+import { ConflictError } from '../../utils/errors/conflictError';
 
 export const academicSemesterSchema = new Schema<TAcademicSemester>(
   {
@@ -38,7 +39,12 @@ academicSemesterSchema.pre('save', async function (next) {
     year: this.year,
   });
   if (isSemesterExists) {
-    throw new Error(`The ${this.name} semester of the year is already exists!`);
+    throw new ConflictError(`The semester is already exists!`, [
+      {
+        path: `${this.name} or ${this.year}`,
+        message: `The semester ${this.name} in ${this.year} is already exists in the system.`,
+      },
+    ]);
   }
   next();
 });
