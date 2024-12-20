@@ -3,6 +3,7 @@ import { StudentModel } from './student.model';
 import { UserModel } from '../user/user.model';
 import { TStudent } from './student.interface';
 import { NotFoundError } from '../../utils/errors/notFoundError';
+import { ConflictError } from '../../utils/errors/conflictError';
 
 const getAllStudentsFromDB = async () => {
   const result = await StudentModel.find({ isDeleted: false }).populate([
@@ -90,9 +91,21 @@ const deleteStudentFromDB = async (id: string) => {
     await session.commitTransaction();
 
     return result;
-  } catch (err) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } catch (err: any) {
     await session.abortTransaction();
-    throw new Error((err as Error).message);
+    if (err.code === 1100) {
+      throw new ConflictError('Duplicate Error', [
+        { path: 'Delete', message: 'Duplicate Error' },
+      ]);
+    }
+    throw new ConflictError('Failed to delete the student.', [
+      {
+        path: 'transaction',
+        message:
+          'Failed to process the transaction due to a conflict. Please try again.',
+      },
+    ]);
   } finally {
     session.endSession();
   }

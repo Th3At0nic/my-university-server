@@ -1,5 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { TAcademicFaculty } from './academicFaculty.interface';
+import { ConflictError } from '../../utils/errors/conflictError';
 
 const AcademicFacultySchema = new Schema<TAcademicFaculty>(
   {
@@ -14,7 +15,12 @@ AcademicFacultySchema.pre('save', async function () {
   });
 
   if (isFacultyExists) {
-    throw new Error('This Faculty is already exists!');
+    throw new ConflictError('This Faculty is already exists!', [
+      {
+        path: `${this.name}`,
+        message: `${this.name} already exists. Duplicate entries are not allowed.`,
+      },
+    ]);
   }
 });
 
