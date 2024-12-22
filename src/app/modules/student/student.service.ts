@@ -19,7 +19,7 @@ const getAllStudentsFromDB = async () => {
   if (!result.length) {
     throw new NotFoundError('No Student found.', [
       {
-        path: 'Students Collection',
+        path: 'Students',
         message: 'The student collection could not be found in the system.',
       },
     ]);

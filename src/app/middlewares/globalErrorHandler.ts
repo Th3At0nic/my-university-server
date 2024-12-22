@@ -10,6 +10,8 @@ import { TErrorSource } from '../interface/error';
 import config from '../config';
 import { handleZodError } from '../utils/errors/handleZodError';
 import { handleMongooseError } from '../utils/errors/handleMongooseError';
+import { handleCastError } from '../utils/errors/handleCastError';
+import { handleDuplicateError } from '../utils/errors/handleDuplicateError';
 
 export const globalErrorHandler: ErrorRequestHandler = (
   err,
@@ -30,30 +32,35 @@ export const globalErrorHandler: ErrorRequestHandler = (
   if (err instanceof NotFoundError) {
     statusCode = err.statusCode;
     message = err.message;
-  }
-
-  if (err instanceof ValidationError) {
+    errorSource = err.errorSource;
+  } else if (err instanceof ValidationError) {
     statusCode = err.statusCode;
     message = err.message;
-  }
-
-  if (err instanceof ConflictError) {
+    errorSource = err.errorSource;
+  } else if (err instanceof ConflictError) {
     statusCode = err.statusCode;
     message = err.message;
-  }
-
-  if (err instanceof ZodError) {
-    const simplifiedZodError = handleZodError(err);
-    statusCode = simplifiedZodError.statusCode;
-    message = simplifiedZodError.message;
-    errorSource = simplifiedZodError.errorSource;
-  }
-
-  if (err.name === 'ValidationError') {
-    const simplifiedMongooseError = handleMongooseError(err);
-    statusCode = simplifiedMongooseError.statusCode;
-    message = simplifiedMongooseError.message;
-    errorSource = simplifiedMongooseError.errorSource;
+    errorSource = err.errorSource;
+  } else if (err instanceof ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.name === 'ValidationError') {
+    const simplifiedError = handleMongooseError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.name === 'CastError') {
+    const simplifiedError = handleCastError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.code === 11000) {
+    const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
   }
 
   res.status(statusCode).json({

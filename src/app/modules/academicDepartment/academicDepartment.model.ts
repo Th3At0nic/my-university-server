@@ -14,12 +14,15 @@ academicDepartmentSchema.pre('save', async function () {
   const isDepartmentExists = await DepartmentModel.findOne({ name: this.name });
 
   if (isDepartmentExists) {
-    throw new ConflictError('This department is already exists!', [
-      {
-        path: `${this.name}`,
-        message: `${this.name} is already exists in the system`,
-      },
-    ]);
+    throw new ConflictError(
+      'Duplicate Error! The Department is already exists.',
+      [
+        {
+          path: `${this.name}`,
+          message: `${this.name} is already exists in the system`,
+        },
+      ],
+    );
   }
 });
 
