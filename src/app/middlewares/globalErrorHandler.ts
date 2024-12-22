@@ -5,24 +5,11 @@ import { ErrorRequestHandler } from 'express';
 import { NotFoundError } from '../utils/errors/notFoundError';
 import { ValidationError } from '../utils/errors/validationError';
 import { ConflictError } from '../utils/errors/conflictError';
-import { ZodError, ZodIssue } from 'zod';
+import { ZodError } from 'zod';
 import { TErrorSource } from '../interface/error';
 import config from '../config';
-
-const handleZodError = (err: ZodError) => {
-  const errorSource: TErrorSource = err.issues.map((issue: ZodIssue) => {
-    return {
-      path: issue.path[issue.path.length - 1],
-      message: issue.message,
-    };
-  });
-  const statusCode = 400;
-  return {
-    statusCode,
-    message: 'Validation Error',
-    errorSource,
-  };
-};
+import { handleZodError } from '../utils/errors/handleZodError';
+import { handleMongooseError } from '../utils/errors/handleMongooseError';
 
 export const globalErrorHandler: ErrorRequestHandler = (
   err,
@@ -62,10 +49,17 @@ export const globalErrorHandler: ErrorRequestHandler = (
     errorSource = simplifiedZodError.errorSource;
   }
 
+  if (err.name === 'ValidationError') {
+    const simplifiedMongooseError = handleMongooseError(err);
+    statusCode = simplifiedMongooseError.statusCode;
+    message = simplifiedMongooseError.message;
+    errorSource = simplifiedMongooseError.errorSource;
+  }
+
   res.status(statusCode).json({
     success: false,
     message,
     errorSource,
-    stack: config.NODE_ENV === 'development' ? err.stack : null,
+    ...(config.NODE_ENV === 'development' ? { stack: err.stack } : null),
   });
 };

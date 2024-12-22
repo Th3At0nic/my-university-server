@@ -1,4 +1,5 @@
-import { TErrorSource } from '../../middlewares/globalErrorHandler';
+import { TErrorSource } from "../../interface/error";
+
 
 export class AppError extends Error {
   public readonly statusCode: number;

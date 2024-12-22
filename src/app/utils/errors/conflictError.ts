@@ -1,4 +1,4 @@
-import { TErrorSource } from '../../middlewares/globalErrorHandler';
+import { TErrorSource } from '../../interface/error';
 import { AppError } from './appError';
 
 export class ConflictError extends AppError {
