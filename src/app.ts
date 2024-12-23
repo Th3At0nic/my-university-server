@@ -16,6 +16,11 @@ app.use(cors());
 //routing to the router folder
 app.use('/api/v1/', router);
 
+// const test = async (req: Request, res: Response) => {
+//   Promise.reject();
+// };
+// app.get('/', test);
+
 app.get('/', (req: Request, res: Response) => {
   res.send('Hello World!');
 });
