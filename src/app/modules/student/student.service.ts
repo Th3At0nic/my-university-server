@@ -5,8 +5,26 @@ import { TStudent } from './student.interface';
 import { NotFoundError } from '../../utils/errors/notFoundError';
 import { ConflictError } from '../../utils/errors/conflictError';
 
-const getAllStudentsFromDB = async () => {
-  const result = await StudentModel.find({ isDeleted: false }).populate([
+const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  let searchTerm = '';
+  if (query?.searchTerm) {
+    searchTerm = query?.searchTerm as string;
+  }
+
+  const result = await StudentModel.find({
+    $or: [
+      'email',
+      'name.firstName',
+      'name.middleName',
+      'name.lastName',
+      'presentAddress',
+      'permanentAddress',
+      'contact',
+    ].map((field) => ({
+      [field]: { $regex: searchTerm, $options: 'i' },
+    })),
+    isDeleted: false,
+  }).populate([
     'admissionSemester',
     {
       path: 'academicDepartment',

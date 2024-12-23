@@ -8,7 +8,7 @@ import catchAsync from '../../utils/catchAsync';
 //imported HOF(catchAsync()) to pass the async func there to handle the promise and error, reduced boilerplates
 const getAllStudents = catchAsync(
   async (req: Request, res: Response, next: NextFunction) => {
-    const result = await studentService.getAllStudentsFromDB();
+    const result = await studentService.getAllStudentsFromDB(req.query);
 
     const message = 'Successfully retrieved students!';
 
