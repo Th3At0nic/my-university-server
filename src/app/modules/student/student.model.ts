@@ -120,7 +120,7 @@ const studentSchema = new Schema<TStudent>(
 
 //creating mongoose virtual to derive property by computing
 studentSchema.virtual('fullName').get(function () {
-  return `${this.name.firstName} ${this.name.middleName} ${this.name.lastName}`;
+  return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
 });
 
 // hiding the deleted students to the user end by filtering

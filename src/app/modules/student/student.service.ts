@@ -29,9 +29,15 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     isDeleted: false,
   });
 
-  const excludeField = ['searchTerm', 'sortBy', 'limit', 'page'];
+  const excludeFieldForFilter = [
+    'searchTerm',
+    'sortBy',
+    'limit',
+    'page',
+    'fields',
+  ];
 
-  excludeField.forEach((elem) => delete queryObject[elem]);
+  excludeFieldForFilter.forEach((elem) => delete queryObject[elem]);
 
   const filterQuery = searchQuery.find(queryObject).populate([
     'admissionSemester',
@@ -66,7 +72,16 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   const paginateQuery = sortQuery.skip(skip);
 
   //limiting the query result
-  const result = await paginateQuery.limit(limit);
+  const limitQuery = paginateQuery.limit(limit);
+
+  //mongoose needs the fields elements like fields: {name email}, no comma sould be there, only a space.
+  let fields = '-__v';
+  if (query.fields) {
+    fields = (query.fields as string).split(',').join(' ');
+  }
+
+  //limiting the fields in in the query result
+  const result = await limitQuery.select(fields);
 
   if (!result.length) {
     throw new NotFoundError('No Student found.', [
