@@ -29,7 +29,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     isDeleted: false,
   });
 
-  const excludeField = ['searchTerm', 'sortBy'];
+  const excludeField = ['searchTerm', 'sortBy', 'limit'];
 
   excludeField.forEach((elem) => delete queryObject[elem]);
 
@@ -49,7 +49,15 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   }
 
   //sorting the query and then assigning in the result
-  const result = await filterQuery.sort(sortBy);
+  const sortQuery = filterQuery.sort(sortBy);
+
+  let limit = 1;
+  if (query.limit) {
+    limit = query.limit as number;
+  }
+
+  //limiting the query result
+  const result = await sortQuery.limit(limit);
 
   if (!result.length) {
     throw new NotFoundError('No Student found.', [
