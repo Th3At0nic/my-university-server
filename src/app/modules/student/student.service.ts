@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import { StudentModel } from './student.model';
 import { UserModel } from '../user/user.model';
 import { TStudent } from './student.interface';
-import { NotFoundError } from '../../utils/errors/notFoundError';
-import { ConflictError } from '../../utils/errors/conflictError';
+import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { ConflictError } from '../../utils/errors/ConflictError';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
   const queryObject = { ...query };

@@ -1,4 +1,4 @@
-import { NotFoundError } from '../../utils/errors/notFoundError';
+import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { TAcademicDepartment } from './academicDepartment.interface';
 import { DepartmentModel } from './academicDepartment.model';
 

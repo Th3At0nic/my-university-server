@@ -2,9 +2,9 @@
 /* eslint-disable no-unused-vars */
 
 import { ErrorRequestHandler } from 'express';
-import { NotFoundError } from '../utils/errors/notFoundError';
-import { ValidationError } from '../utils/errors/validationError';
-import { ConflictError } from '../utils/errors/conflictError';
+import { NotFoundError } from '../utils/errors/NotFoundError';
+import { ValidationError } from '../utils/errors/ValidationError';
+import { ConflictError } from '../utils/errors/ConflictError';
 import { ZodError } from 'zod';
 import { TErrorSource } from '../interface/error';
 import config from '../config';

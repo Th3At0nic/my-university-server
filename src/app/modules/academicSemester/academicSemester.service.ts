@@ -1,5 +1,5 @@
-import { NotFoundError } from '../../utils/errors/notFoundError';
-import { ValidationError } from '../../utils/errors/validationError';
+import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { ValidationError } from '../../utils/errors/ValidationError';
 import { semesterCodeNameMapper } from './academicSemester.constants';
 import { TAcademicSemester } from './academicSemester.interface';
 import { SemesterModel } from './academicSemester.model';

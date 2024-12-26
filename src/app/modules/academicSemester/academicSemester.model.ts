@@ -5,7 +5,7 @@ import {
   academicSemesterName,
   months,
 } from './academicSemester.constants';
-import { ConflictError } from '../../utils/errors/conflictError';
+import { ConflictError } from '../../utils/errors/ConflictError';
 
 export const academicSemesterSchema = new Schema<TAcademicSemester>(
   {

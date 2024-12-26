@@ -5,7 +5,7 @@ import { StudentModel } from '../student/student.model';
 import { TUser } from './user.interface';
 import { UserModel } from './user.model';
 import { generateNewStudentId } from './user.utils';
-import { ConflictError } from '../../utils/errors/conflictError';
+import { ConflictError } from '../../utils/errors/ConflictError';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes

@@ -1,6 +1,6 @@
 import { model, Schema } from 'mongoose';
 import { TAcademicFaculty } from './academicFaculty.interface';
-import { ConflictError } from '../../utils/errors/conflictError';
+import { ConflictError } from '../../utils/errors/ConflictError';
 
 const AcademicFacultySchema = new Schema<TAcademicFaculty>(
   {
