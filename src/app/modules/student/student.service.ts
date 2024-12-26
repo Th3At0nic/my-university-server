@@ -6,25 +6,34 @@ import { NotFoundError } from '../../utils/errors/notFoundError';
 import { ConflictError } from '../../utils/errors/conflictError';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
+  const queryObject = { ...query };
+
+  const studentSearchableFields = [
+    'email',
+    'name.firstName',
+    'name.middleName',
+    'name.lastName',
+    'presentAddress',
+    'permanentAddress',
+    'contact',
+  ];
   let searchTerm = '';
-  if (query?.searchTerm) {
-    searchTerm = query?.searchTerm as string;
+  if (query.searchTerm) {
+    searchTerm = query.searchTerm as string;
   }
 
-  const result = await StudentModel.find({
-    $or: [
-      'email',
-      'name.firstName',
-      'name.middleName',
-      'name.lastName',
-      'presentAddress',
-      'permanentAddress',
-      'contact',
-    ].map((field) => ({
+  const searchQuery = StudentModel.find({
+    $or: studentSearchableFields.map((field) => ({
       [field]: { $regex: searchTerm, $options: 'i' },
     })),
     isDeleted: false,
-  }).populate([
+  });
+
+  const excludeField = ['searchTerm', 'sortBy'];
+
+  excludeField.forEach((elem) => delete queryObject[elem]);
+
+  const filterQuery = searchQuery.find(queryObject).populate([
     'admissionSemester',
     {
       path: 'academicDepartment',
@@ -33,6 +42,14 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
       },
     },
   ]);
+
+  let sortBy = '-createdAt';
+  if (query.sortBy) {
+    sortBy = query.sortBy as string;
+  }
+
+  //sorting the query and then assigning in the result
+  const result = await filterQuery.sort(sortBy);
 
   if (!result.length) {
     throw new NotFoundError('No Student found.', [

@@ -25,7 +25,7 @@ export const globalErrorHandler: ErrorRequestHandler = (
   let errorSource: TErrorSource = [
     {
       path: '',
-      message: 'Something went wrong',
+      message: err.message,
     },
   ];
 
