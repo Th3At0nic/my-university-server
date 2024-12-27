@@ -8,80 +8,19 @@ import { QueryBuilder } from '../../builder/QueryBuilder';
 import { studentSearchableFields } from './student.constants';
 
 const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
-  // const queryObject = { ...query };
-  // const studentSearchableFields = [
-  //   'email',
-  //   'name.firstName',
-  //   'name.middleName',
-  //   'name.lastName',
-  //   'presentAddress',
-  //   'permanentAddress',
-  //   'contact',
-  // ];
-
-  // let searchTerm = '';
-  // if (query.searchTerm) {
-  //   searchTerm = query.searchTerm as string;
-  // }
-
-  // const searchQuery = StudentModel.find({
-  //   $or: studentSearchableFields.map((field) => ({
-  //     [field]: { $regex: searchTerm, $options: 'i' },
-  //   })),
-  //   isDeleted: false,
-  // });
-
-  // const excludeFieldForFilter = [
-  //   'searchTerm',
-  //   'sortBy',
-  //   'limit',
-  //   'page',
-  //   'fields',
-  // ];
-
-  // excludeFieldForFilter.forEach((elem) => delete queryObject[elem]);
-
-  // const filterQuery = searchQuery.find(queryObject).populate([
-  //   'admissionSemester',
-  //   {
-  //     path: 'academicDepartment',
-  //     populate: {
-  //       path: 'academicFaculty',
-  //     },
-  //   },
-  // ]);
-
-  // let sortBy = '-createdAt';
-  // if (query.sortBy) {
-  //   sortBy = query.sortBy as string;
-  // }
-
-  // //sorting the query and then assigning in the result
-  // const sortQuery = filterQuery.sort(sortBy);
-
-  // let limit = 1;
-  // if (query.limit) {
-  //   limit = Number(query.limit);
-  // }
-
-  // let page = 1;
-  // let skip = 0;
-  // if (query.page) {
-  //   page = Number(query.page);
-  //   skip = (page - 1) * limit;
-  // }
-
-  // //sorting and limiting the result
-  // const paginateQuery = sortQuery.skip(skip).limit(limit);
-
-  // //mongoose needs the fields elements like fields: {name email}, no comma sould be there, only a space.
-  // let fields = '-__v';
-  // if (query.fields) {
-  //   fields = (query.fields as string).split(',').join(' ');
-  // }
-
   //applying all query methods by chaining , by creating an instance of the QueryBuilder class
-  const studentQuery = new QueryBuilder(query, StudentModel.find())
+  const studentQuery = new QueryBuilder(
+    query,
+    StudentModel.find().populate([
+      'admissionSemester',
+      {
+        path: 'academicDepartment',
+        populate: {
+          path: 'academicFaculty',
+        },
+      },
+    ]),
+  )
     .search(studentSearchableFields)
     .filter()
     .sortBy()
@@ -89,15 +28,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     .fields();
 
   // now assigning the result of instance class into the result const
-  const result = await studentQuery.modelQuery?.populate([
-    'admissionSemester',
-    {
-      path: 'academicDepartment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    },
-  ]);
+  const result = await studentQuery.modelQuery;
 
   if (!result.length) {
     throw new NotFoundError('No Student found.', [
