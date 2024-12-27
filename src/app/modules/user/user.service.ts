@@ -43,15 +43,9 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
       studentData.isDeleted = newUser[0].isDeleted;
 
       //creating a new student
-      const newStudent = await StudentModel.create(
-        [
-          {
-            ...studentData,
-            password,
-          },
-        ],
-        { session },
-      );
+      const newStudent = await StudentModel.create([studentData], {
+        session,
+      });
 
       //this block of code is responsible for providing response data with populated admissionSemester and academicDepartment document
       const populatedNewStudent = await StudentModel.findById([
@@ -74,11 +68,14 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   } catch (err: any) {
     await session.abortTransaction();
     if (err.code === 11000) {
-      throw new ConflictError('Failed to create User and Student.', [
+      // Extracting the conflicting field
+      const duplicateField = Object.keys(err.keyValue)[0]; // e.g., 'email'
+      const duplicateValue = err.keyValue[duplicateField]; // e.g., 'john.kr7@example.com'
+    
+      throw new ConflictError('Duplicate Key Error!', [
         {
-          path: 'transaction',
-          message:
-            'Failed to process the transaction due to a conflict. Please check your data and try again.',
+          path: duplicateField,
+          message: `The ${duplicateField} '${duplicateValue}' already exists. Please use a different ${duplicateField}.`,
         },
       ]);
     }
