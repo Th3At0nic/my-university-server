@@ -1,3 +1,4 @@
+import { QueryBuilder } from '../../builder/QueryBuilder';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { TAcademicDepartment } from './academicDepartment.interface';
 import { DepartmentModel } from './academicDepartment.model';
@@ -7,9 +8,22 @@ const createAcademicDepartmentIntoDB = async (data: TAcademicDepartment) => {
   return result;
 };
 
-const getAllAcademicDepartmentFromDB = async () => {
-  const result = await DepartmentModel.find().populate('academicFaculty');
-  if (!result) {
+const getAllAcademicDepartmentFromDB = async (
+  query: Record<string, unknown>,
+) => {
+  const searchableFields = ['name'];
+  const academicDepartmentQuery = new QueryBuilder(
+    query,
+    DepartmentModel.find().populate('academicFaculty'),
+  )
+    .search(searchableFields)
+    .filter()
+    .paginate()
+    .sortBy()
+    .fields();
+  const result = await academicDepartmentQuery.modelQuery;
+
+  if (!result.length) {
     throw new NotFoundError(`Academic department not found!`, [
       {
         path: 'Department',
