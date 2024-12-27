@@ -1,3 +1,4 @@
+import { QueryBuilder } from '../../builder/QueryBuilder';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { TAcademicFaculty } from './academicFaculty.interface';
 import { AcademicFacultyModel } from './academicFaculty.model';
@@ -7,9 +8,20 @@ const createAcademicFacultyIntoDB = async (data: TAcademicFaculty) => {
   return result;
 };
 
-const getAllAcademicFacultyFromDB = async () => {
-  const result = await AcademicFacultyModel.find();
-  if (!result) {
+const getAllAcademicFacultyFromDB = async (query: Record<string, unknown>) => {
+  const searchableFields = ['name'];
+  const academicFacultyQuery = new QueryBuilder(
+    query,
+    AcademicFacultyModel.find(),
+  )
+    .search(searchableFields)
+    .filter()
+    .paginate()
+    .sortBy()
+    .fields();
+
+  const result = await academicFacultyQuery.modelQuery;
+  if (!result.length) {
     throw new NotFoundError(`No Academic Faculty found`, [
       {
         path: `academic faculty`,
