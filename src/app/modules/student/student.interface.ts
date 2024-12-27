@@ -41,7 +41,7 @@ export type TStudent = {
   academicDepartment: Types.ObjectId;
   admissionSemester: Types.ObjectId;
   isDeleted: boolean;
-  profileImg?: string;
+  profileImg: string;
 };
 
 // creating a static methods interface

@@ -1,11 +1,14 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import config from '../../config';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
 import { TUser } from './user.interface';
 import { UserModel } from './user.model';
-import { generateNewStudentId } from './user.utils';
+import { generateNewStudentId, generateRoleBasedId } from './user.utils';
 import { ConflictError } from '../../utils/errors/ConflictError';
+import { FacultyModel } from '../faculty/faculty.model';
+import { TFaculty } from '../faculty/faculty.interface';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
@@ -48,9 +51,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
       });
 
       //this block of code is responsible for providing response data with populated admissionSemester and academicDepartment document
-      const populatedNewStudent = await StudentModel.findById([
-        newStudent[0]._id,
-      ])
+      const populatedNewStudent = await StudentModel.findById(newStudent[0]._id)
         .populate('admissionSemester')
         .populate({
           path: 'academicDepartment',
@@ -64,14 +65,13 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
 
       return populatedNewStudent;
     }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
     if (err.code === 11000) {
       // Extracting the conflicting field
       const duplicateField = Object.keys(err.keyValue)[0]; // e.g., 'email'
       const duplicateValue = err.keyValue[duplicateField]; // e.g., 'john.kr7@example.com'
-    
+
       throw new ConflictError('Duplicate Key Error!', [
         {
           path: duplicateField,
@@ -84,22 +84,71 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   }
 
   return 'Something went wrong while creating a new User using UserModel!';
+};
 
-  //creating a static methods for interacting with the db with model before creating/saving into the db
-  // if (await StudentModel.isUserExists(studentData.id)) {
-  //   throw new Error('User already exists!');
-  // }
-  // const result = await StudentModel.create(studentData); //built-in static methods of mongoose
-  //creating an instance of StudentModel class
-  // const student = new StudentModel<TStudent>(studentData);
-  // if (await student.isUserExists(studentData.id)) {
-  //   throw new Error('User already exists!');
-  // }
-  // const result = await student.save(); //built-in instance method
-  //   return result;
-  //both the instance method or static method works same. but static method is directly creating and saving the data in DB by one command or call, where instance method gives flexiblity , like modifying the data before saving into DB
+//
+//
+//creating faculty in the db as well as user together
+const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const user: Partial<TUser> = {
+      password: password || (config.default_password as string),
+      role: 'faculty',
+      id: await generateRoleBasedId(facultyData, 'faculty'),
+      //first parameter should be data and second should be determine role to create different id
+    };
+
+    const newUser = await UserModel.create([user], { session });
+
+    if (newUser.length) {
+      //assigning faculty id and user from the user id
+      facultyData.id = newUser[0].id;
+
+      facultyData.user = newUser[0]._id;
+
+      facultyData.isDeleted = newUser[0].isDeleted;
+
+      const newFaculty = await FacultyModel.create([facultyData], { session });
+
+      const populatedNewFaculty = await FacultyModel.findById(newFaculty[0]._id)
+        .populate('academicFaculty')
+        .populate({
+          path: 'academicDepartment',
+          populate: {
+            path: 'academicFaculty',
+          },
+        })
+        .session(session);
+
+      await session.commitTransaction();
+
+      return populatedNewFaculty;
+    }
+  } catch (err: any) {
+    await session.abortTransaction();
+
+    if (err.code === 11000) {
+      // Extracting the conflicting field
+      const duplicateField = Object.keys(err.keyValue)[0]; // e.g., 'email'
+      const duplicateValue = err.keyValue[duplicateField]; // e.g., 'john.kr7@example.com'
+
+      throw new ConflictError('Duplicate Key Error!', [
+        {
+          path: duplicateField,
+          message: `The ${duplicateField} '${duplicateValue}' already exists. Please use a different ${duplicateField}.`,
+        },
+      ]);
+    }
+  } finally {
+    session.endSession();
+  }
+  return 'Something went wrong while creating a new User using UserModel!';
 };
 
 export const userServices = {
   createStudentIntoDB,
+  createFacultyIntoDB,
 };

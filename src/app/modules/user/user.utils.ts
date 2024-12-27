@@ -1,4 +1,5 @@
 import { SemesterModel } from '../academicSemester/academicSemester.model';
+import { TFaculty } from '../faculty/faculty.interface';
 import { TStudent } from '../student/student.interface';
 import { UserModel } from './user.model';
 
@@ -39,4 +40,30 @@ export const generateNewStudentId = async (studentData: TStudent) => {
     return assembleNewStudentId;
   }
   return firstStudentId;
+};
+
+export const generateRoleBasedId = async (userData: TFaculty, role: string) => {
+  const initialId = (0).toString();
+  const facultyPrefix = 'F-';
+  // const adminPrefix = 'A-';
+  if (role === 'faculty') {
+    const firstFacultyId = (initialId + 1).padStart(4, '0');
+
+    const lastFaculty = await UserModel.find({ role: 'faculty' }).sort({
+      createdAt: -1,
+    });
+
+    if (lastFaculty.length) {
+      const lastFacultyIdNumeric = lastFaculty[0].id.substring(
+        facultyPrefix.length,
+      );
+      const newFacultyId = (Number(lastFacultyIdNumeric) + 1)
+        .toString()
+        .padStart(4, '0');
+      return `${facultyPrefix}${newFacultyId}`;
+    } else {
+      return `${facultyPrefix}${firstFacultyId}`;
+    }
+  }
+  return 'Something went wrong while creating an ID';
 };
