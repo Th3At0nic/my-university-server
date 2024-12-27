@@ -16,7 +16,6 @@ export class QueryBuilder<T> {
         $or: searchableFields.map((field) => ({
           [field]: { $regex: searchTerm, $options: 'i' },
         })),
-        isDeleted: false,
       });
     }
     return this;

@@ -7,11 +7,3 @@ export const studentSearchableFields = [
   'permanentAddress',
   'contact',
 ];
-
-export const excludeFieldForFilter = [
-  'searchTerm',
-  'sortBy',
-  'limit',
-  'page',
-  'fields',
-];

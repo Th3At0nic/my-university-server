@@ -19,7 +19,9 @@ const createAcademicSemester = catchAsync(async (req, res, next) => {
 
 //req handling to retriev all academic semesters from the DB
 const getAllAcademicSemester = catchAsync(async (req, res, next) => {
-  const result = await AcademicSemesterServices.getAllAcademicSemestersFromDB();
+  const result = await AcademicSemesterServices.getAllAcademicSemestersFromDB(
+    req.query,
+  );
 
   const message = 'All Academic semesters are retrieved successfully!';
 
@@ -31,7 +33,6 @@ const getAnAcademicSemester = catchAsync(async (req, res, next) => {
   const { id } = req.params;
   const result = await AcademicSemesterServices.getAnAcademicSemesterFromDB(id);
 
-  
   const message = 'The semester retrieved successfully!';
 
   sendResponse(res, 200, true, message, result);

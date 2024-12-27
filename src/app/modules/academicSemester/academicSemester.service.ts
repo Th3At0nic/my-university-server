@@ -1,3 +1,4 @@
+import { QueryBuilder } from '../../builder/QueryBuilder';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { ValidationError } from '../../utils/errors/ValidationError';
 import { semesterCodeNameMapper } from './academicSemester.constants';
@@ -29,8 +30,19 @@ const createAcademicSemesterIntoDB = async (payload: TAcademicSemester) => {
 };
 
 //retrieving all academic semesters from the DB
-const getAllAcademicSemestersFromDB = async () => {
-  const result = await SemesterModel.find();
+const getAllAcademicSemestersFromDB = async (
+  query: Record<string, unknown>,
+) => {
+  const searchableFields = ['name', 'code', 'year', 'startMonth', 'endMonth'];
+
+  const academicSemesterQuery = new QueryBuilder(query, SemesterModel.find())
+    .search(searchableFields)
+    .filter()
+    .paginate()
+    .sortBy()
+    .fields();
+
+  const result = await academicSemesterQuery.modelQuery;
   if (!result.length) {
     throw new NotFoundError(`No semester found.`, [
       {
