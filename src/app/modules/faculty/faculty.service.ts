@@ -5,9 +5,35 @@ import { TFaculty } from './faculty.interface';
 import { FacultyModel } from './faculty.model';
 import { UserModel } from '../user/user.model';
 import { ConflictError } from '../../utils/errors/ConflictError';
+import { QueryBuilder } from '../../builder/QueryBuilder';
 
-const getAllFacultiesFromDB = async () => {
-  const result = await FacultyModel.find();
+const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
+  const searchableFields = [
+    'id',
+    'name',
+    'contactNo',
+    'gender',
+    'designation',
+    'permanentAddress',
+    'presentAddress',
+  ];
+  const facultyQuery = new QueryBuilder(
+    query,
+    FacultyModel.find()
+      .populate('academicFaculty')
+      .populate({
+        path: 'academicDepartment',
+        populate: {
+          path: 'academicFaculty',
+        },
+      }),
+  )
+    .search(searchableFields)
+    .filter()
+    .paginate()
+    .sortBy()
+    .fields();
+  const result = await facultyQuery.modelQuery;
   if (!result.length) {
     throw new NotFoundError('No Faculty found.', [
       {
