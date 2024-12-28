@@ -5,7 +5,7 @@ import sendResponse from '../../utils/sendResponse';
 import { AdminServices } from './admin.service';
 
 const getAllAdmins = catchAsync(async (req, res, next) => {
-  const result = await AdminServices.getAllAdminsFromDB();
+  const result = await AdminServices.getAllAdminsFromDB(req.query);
   const message = 'Retrieved all admins successfully!';
 
   sendResponse(res, 200, true, message, result);

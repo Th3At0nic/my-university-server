@@ -1,9 +1,29 @@
+import { QueryBuilder } from '../../builder/QueryBuilder';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { TAdmin } from './admin.interface';
 import { AdminModel } from './admin.model';
 
-const getAllAdminsFromDB = async () => {
-  const result = await AdminModel.find().populate('managementDepartment');
+const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
+  const searchableFields = [
+    'id',
+    'name',
+    'designation',
+    'email',
+    'contactNo',
+    'presentAddress',
+    'permanentAddress',
+    'gender',
+  ];
+  const adminQuery = new QueryBuilder(
+    query,
+    AdminModel.find().populate('managementDepartment'),
+  )
+    .search(searchableFields)
+    .filter()
+    .paginate()
+    .sortBy()
+    .fields();
+  const result = await adminQuery.modelQuery;
   if (!result) {
     throw new NotFoundError('No admin found!', [
       { path: 'Admin', message: 'No admin found in the system' },
@@ -47,8 +67,14 @@ const updateAdminIntoDB = async (id: string, updateData: Partial<TAdmin>) => {
   return result;
 };
 
+const deleteAdminFromDB = async (id: string) => {
+  const result = await AdminModel.findOneAndUpdate({ id }, { isDeleted: true });
+  return result;
+};
+
 export const AdminServices = {
   getAllAdminsFromDB,
   getAnAdminFromDB,
   updateAdminIntoDB,
+  deleteAdminFromDB,
 };
