@@ -82,7 +82,7 @@ const deleteStudentFromDB = async (id: string) => {
       throw new NotFoundError(`Student not found!`, [
         {
           path: `${id}`,
-          message: `No student found with the provided ID: ${id}. Please check the ID and try again.`,
+          message: `No student found with the provided ID: ${id}. The record may have been deleted or does not exist. Please check the ID and try again.`,
         },
       ]);
     }
@@ -101,6 +101,14 @@ const deleteStudentFromDB = async (id: string) => {
       { isDeleted: true },
       { new: true, session },
     );
+    if (!result) {
+      throw new ConflictError(`Failed to deleted.`, [
+        {
+          path: id,
+          message: 'Failed to deleted the student. Transaction is aborted.',
+        },
+      ]);
+    }
 
     await session.commitTransaction();
 
@@ -108,18 +116,7 @@ const deleteStudentFromDB = async (id: string) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (err: any) {
     await session.abortTransaction();
-    if (err.code === 1100) {
-      throw new ConflictError('Duplicate Error', [
-        { path: 'Delete', message: 'Duplicate Error' },
-      ]);
-    }
-    throw new ConflictError('Failed to delete the student.', [
-      {
-        path: 'transaction',
-        message:
-          'Failed to process the transaction due to a conflict. Please try again.',
-      },
-    ]);
+    throw err;
   } finally {
     session.endSession();
   }

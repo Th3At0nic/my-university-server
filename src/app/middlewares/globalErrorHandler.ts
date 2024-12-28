@@ -19,50 +19,52 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res,
   next,
 ) => {
-  let statusCode = err.statusCode || 500;
-  let message = err.message || 'Something went wrong!';
+  const statusCode = err.statusCode || 500;
+  const message = err.message || 'Something went wrong!';
 
-  let errorSource: TErrorSource = [
-    {
-      path: '',
-      message: err.message,
-    },
+  const errorSource: TErrorSource = err.errorSource || [
+    { path: '', message: 'Something went wrong' },
   ];
 
-  if (err instanceof NotFoundError) {
-    statusCode = err.statusCode;
-    message = err.message;
-    errorSource = err.errorSource;
-  } else if (err instanceof ValidationError) {
-    statusCode = err.statusCode;
-    message = err.message;
-    errorSource = err.errorSource;
-  } else if (err instanceof ConflictError) {
-    statusCode = err.statusCode;
-    message = err.message;
-    errorSource = err.errorSource;
-  } else if (err instanceof ZodError) {
-    const simplifiedError = handleZodError(err);
-    statusCode = simplifiedError.statusCode;
-    message = simplifiedError.message;
-    errorSource = simplifiedError.errorSource;
-  } else if (err.name === 'ValidationError') {
-    const simplifiedError = handleMongooseError(err);
-    statusCode = simplifiedError.statusCode;
-    message = simplifiedError.message;
-    errorSource = simplifiedError.errorSource;
-  } else if (err.name === 'CastError') {
-    const simplifiedError = handleCastError(err);
-    statusCode = simplifiedError.statusCode;
-    message = simplifiedError.message;
-    errorSource = simplifiedError.errorSource;
-  } else if (err.code === 11000) {
-    const simplifiedError = handleDuplicateError(err);
-    statusCode = simplifiedError.statusCode;
-    message = simplifiedError.message;
-    errorSource = simplifiedError.errorSource;
-  }
-
+  // if (err instanceof NotFoundError) {
+  //   statusCode = err.statusCode;
+  //   message = err.message;
+  //   errorSource = err.errorSource;
+  // } else if (err instanceof ValidationError) {
+  //   statusCode = err.statusCode;
+  //   message = err.message;
+  //   errorSource = err.errorSource;
+  // } else if (err instanceof ConflictError) {
+  //   statusCode = err.statusCode;
+  //   message = err.message;
+  //   errorSource = err.errorSource;
+  // } else if (err instanceof ZodError) {
+  //   const simplifiedError = handleZodError(err);
+  //   statusCode = simplifiedError.statusCode;
+  //   message = simplifiedError.message;
+  //   errorSource = simplifiedError.errorSource;
+  // } else if (err.name === 'ValidationError') {
+  //   const simplifiedError = handleMongooseError(err);
+  //   statusCode = simplifiedError.statusCode;
+  //   message = simplifiedError.message;
+  //   errorSource = simplifiedError.errorSource;
+  // } else if (err.name === 'CastError') {
+  //   const simplifiedError = handleCastError(err);
+  //   statusCode = simplifiedError.statusCode;
+  //   message = simplifiedError.message;
+  //   errorSource = simplifiedError.errorSource;
+  // } else if (err.code === 11000) {
+  //   const simplifiedError = handleDuplicateError(err);
+  //   statusCode = simplifiedError.statusCode;
+  //   message = simplifiedError.message;
+  //   errorSource = simplifiedError.errorSource;
+  // }
+  // errorSource = [
+  //   {
+  //     path: '',
+  //     message: '',
+  //   },
+  // ];
   res.status(statusCode).json({
     success: false,
     message,
