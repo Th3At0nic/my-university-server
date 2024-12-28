@@ -34,4 +34,12 @@ const adminSchema = new Schema<TAdmin>(
   { timestamps: true },
 );
 
+adminSchema.pre('find', function () {
+  this.find({ isDeleted: { $ne: true } });
+});
+
+adminSchema.pre('findOne', function () {
+  this.findOne({ isDeleted: { $ne: true } });
+});
+
 export const AdminModel = model<TAdmin>('Admin', adminSchema);

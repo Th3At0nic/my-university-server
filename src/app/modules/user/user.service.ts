@@ -166,7 +166,7 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
     };
 
     const newUser = await UserModel.create([user], { session });
-    console.log('new user: ', newUser);
+
     if (newUser.length) {
       //assigning faculty id and user from the user id
       adminData.id = newUser[0].id;

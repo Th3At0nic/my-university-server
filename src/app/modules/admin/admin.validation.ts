@@ -36,3 +36,26 @@ export const AdminValidationSchema = z.object({
 });
 
 // export type AdminValidationType = z.infer<typeof AdminValidationSchema>;
+
+export const updateAdminValidationSchema = z.object({
+  // password: z
+  //   .string()
+  //   .trim()
+  //   .max(35, { message: "Password can't have more than 35 characters" })
+  //   .optional(),
+  body: z
+    .object({
+      designation: z.string().optional(),
+      name: z.string().optional(),
+      gender: z.enum(['male', 'female', 'others']).optional(),
+      dateOfBirth: z.string().optional(),
+      email: z.string().email().optional(),
+      contactNo: z.string().optional(),
+      emergencyContactNo: z.string().optional(),
+      presentAddress: z.string().optional(),
+      permanentAddress: z.string().optional(),
+      profileImage: z.string().optional(),
+      managementDepartment: z.string().optional(),
+    })
+    .optional(),
+});
