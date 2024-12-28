@@ -1,5 +1,4 @@
 import { SemesterModel } from '../academicSemester/academicSemester.model';
-import { TFaculty } from '../faculty/faculty.interface';
 import { TStudent } from '../student/student.interface';
 import { UserModel } from './user.model';
 
@@ -42,11 +41,11 @@ export const generateNewStudentId = async (studentData: TStudent) => {
   return firstStudentId;
 };
 
-export const generateRoleBasedId = async (userData: TFaculty, role: string) => {
+export const generateRoleBasedId = async (role: string) => {
   const initialId = (0).toString();
-  const facultyPrefix = 'F-';
-  // const adminPrefix = 'A-';
+
   if (role === 'faculty') {
+    const facultyPrefix = 'F-';
     const firstFacultyId = (initialId + 1).padStart(4, '0');
 
     const lastFaculty = await UserModel.find({ role: 'faculty' }).sort({
@@ -61,9 +60,28 @@ export const generateRoleBasedId = async (userData: TFaculty, role: string) => {
         .toString()
         .padStart(4, '0');
       return `${facultyPrefix}${newFacultyId}`;
-    } else {
-      return `${facultyPrefix}${firstFacultyId}`;
     }
+
+    return `${facultyPrefix}${firstFacultyId}`;
+  }
+
+  if (role === 'admin') {
+    const adminPrefix = 'A-';
+    const firstAdminId = (initialId + 1).padStart(4, '0');
+
+    const lastAdmin = await UserModel.find({ role: 'admin' }).sort({
+      createdAt: -1,
+    });
+
+    if (lastAdmin.length) {
+      const lastAdminIdNumeric = lastAdmin[0].id.substring(adminPrefix.length);
+      const newAdminId = (Number(lastAdminIdNumeric) + 1)
+        .toString()
+        .padStart(4, '0');
+      return `${adminPrefix}${newAdminId}`;
+    }
+
+    return `${adminPrefix}${firstAdminId}`;
   }
   return 'Something went wrong while creating an ID';
 };

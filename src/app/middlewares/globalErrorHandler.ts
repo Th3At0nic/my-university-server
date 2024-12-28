@@ -2,9 +2,6 @@
 /* eslint-disable no-unused-vars */
 
 import { ErrorRequestHandler } from 'express';
-import { NotFoundError } from '../utils/errors/NotFoundError';
-import { ValidationError } from '../utils/errors/ValidationError';
-import { ConflictError } from '../utils/errors/ConflictError';
 import { ZodError } from 'zod';
 import { TErrorSource } from '../interface/error';
 import config from '../config';
@@ -19,13 +16,34 @@ export const globalErrorHandler: ErrorRequestHandler = (
   res,
   next,
 ) => {
-  const statusCode = err.statusCode || 500;
-  const message = err.message || 'Something went wrong!';
+  let statusCode = err.statusCode || 500;
+  let message = err.message || 'Something went wrong!';
 
-  const errorSource: TErrorSource = err.errorSource || [
-    { path: '', message: 'Something went wrong' },
+  let errorSource: TErrorSource = err.errorSource || [
+    { path: '', message: err.message || 'Something went wrong' },
   ];
 
+  if (err instanceof ZodError) {
+    const simplifiedError = handleZodError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.name === 'ValidationError') {
+    const simplifiedError = handleMongooseError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.name === 'CastError') {
+    const simplifiedError = handleCastError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  } else if (err.code === 11000) {
+    const simplifiedError = handleDuplicateError(err);
+    statusCode = simplifiedError.statusCode;
+    message = simplifiedError.message;
+    errorSource = simplifiedError.errorSource;
+  }
   // if (err instanceof NotFoundError) {
   //   statusCode = err.statusCode;
   //   message = err.message;
@@ -38,33 +56,8 @@ export const globalErrorHandler: ErrorRequestHandler = (
   //   statusCode = err.statusCode;
   //   message = err.message;
   //   errorSource = err.errorSource;
-  // } else if (err instanceof ZodError) {
-  //   const simplifiedError = handleZodError(err);
-  //   statusCode = simplifiedError.statusCode;
-  //   message = simplifiedError.message;
-  //   errorSource = simplifiedError.errorSource;
-  // } else if (err.name === 'ValidationError') {
-  //   const simplifiedError = handleMongooseError(err);
-  //   statusCode = simplifiedError.statusCode;
-  //   message = simplifiedError.message;
-  //   errorSource = simplifiedError.errorSource;
-  // } else if (err.name === 'CastError') {
-  //   const simplifiedError = handleCastError(err);
-  //   statusCode = simplifiedError.statusCode;
-  //   message = simplifiedError.message;
-  //   errorSource = simplifiedError.errorSource;
-  // } else if (err.code === 11000) {
-  //   const simplifiedError = handleDuplicateError(err);
-  //   statusCode = simplifiedError.statusCode;
-  //   message = simplifiedError.message;
-  //   errorSource = simplifiedError.errorSource;
   // }
-  // errorSource = [
-  //   {
-  //     path: '',
-  //     message: '',
-  //   },
-  // ];
+
   res.status(statusCode).json({
     success: false,
     message,
