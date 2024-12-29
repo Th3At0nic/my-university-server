@@ -42,7 +42,7 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getSingleStudentFromDB = async (id: string) => {
-  const result = await StudentModel.findOne({ id, isDeleted: false }).populate([
+  const result = await StudentModel.findById(id).populate([
     'admissionSemester',
     {
       path: 'academicDepartment',
@@ -73,12 +73,9 @@ const deleteStudentFromDB = async (id: string) => {
   try {
     session.startTransaction();
 
-    const student = await StudentModel.findOne({
-      id: id,
-      isDeleted: false,
-    });
+    const student = await StudentModel.findById(id);
 
-    if (!student) {
+    if (!student || student.isDeleted) {
       throw new NotFoundError(`Student not found!`, [
         {
           path: `${id}`,
@@ -87,8 +84,8 @@ const deleteStudentFromDB = async (id: string) => {
       ]);
     }
 
-    await UserModel.findOneAndUpdate(
-      { id },
+    await UserModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       {
         new: true,
@@ -96,8 +93,8 @@ const deleteStudentFromDB = async (id: string) => {
       },
     );
 
-    const result = await StudentModel.findOneAndUpdate(
-      { id },
+    const result = await StudentModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -126,7 +123,7 @@ const updateStudentIntoDB = async (
   id: string,
   updatedData: Partial<TStudent>,
 ) => {
-  const student = await StudentModel.findOne({ id });
+  const student = await StudentModel.findByIdAndUpdate(id);
   if (!student || student.isDeleted) {
     throw new NotFoundError(`Student not found!`, [
       {
@@ -158,10 +155,21 @@ const updateStudentIntoDB = async (
     }
   }
 
-  const result = await StudentModel.findOneAndUpdate({ id }, flattenedData, {
+  const result = await StudentModel.findByIdAndUpdate(id, flattenedData, {
     new: true,
     runValidators: true,
   });
+
+  if (!result) {
+    throw new ConflictError(`Failed to update.`, [
+      {
+        path: id,
+        message:
+          'Failed to update the student. Please check your id and data and try again.',
+      },
+    ]);
+  }
+
   return result;
 };
 

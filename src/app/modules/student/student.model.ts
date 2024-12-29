@@ -1,4 +1,6 @@
-import { model, Schema } from 'mongoose';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+import { model, Query, Schema } from 'mongoose';
 import {
   TGuardian,
   TStudent,
@@ -125,18 +127,16 @@ studentSchema.virtual('fullName').get(function () {
 });
 
 // hiding the deleted students to the user end by filtering
-studentSchema.pre('find', function () {
+
+// For find-like operations
+studentSchema.pre(/^find/, function (this: Query<any, any>) {
   this.find({ isDeleted: { $ne: true } });
 });
+
 
 // this is also same: hiding the delted data to the client if searched, but this specailly work for aggregate method if used in the service
 studentSchema.pre('aggregate', function () {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });
-});
-
-//hiding the deleted student to the client if the client search student by the id which is deleted earlier
-studentSchema.pre('findOne', function () {
-  this.findOne({ isDeleted: { $ne: true } });
 });
 
 //creating a static method for the student Schema which will be use to query on the db
