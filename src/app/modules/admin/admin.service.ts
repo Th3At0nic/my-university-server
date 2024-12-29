@@ -60,9 +60,19 @@ const updateAdminIntoDB = async (id: string, updateData: Partial<TAdmin>) => {
     ]);
   }
 
+  const { name, ...remainingData } = updateData;
+
+  const flattenedData: Record<string, unknown> = { ...remainingData };
+
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      flattenedData[`name.${key}`] = value;
+    }
+  }
+
   const result = await AdminModel.findByIdAndUpdate(
     id,
-    { $set: updateData },
+    { $set: flattenedData },
     { new: true, runValidators: true },
   );
 

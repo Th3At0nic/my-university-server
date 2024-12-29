@@ -20,7 +20,7 @@ const getAnAdmin = catchAsync(async (req, res, next) => {
 
 const updateAdmin = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const updatedData = req.body;
+  const { admin: updatedData } = req.body;
   const result = await AdminServices.updateAdminIntoDB(id, updatedData);
   const message = 'Successfully updated the admin!';
   sendResponse(res, 200, true, message, result);
