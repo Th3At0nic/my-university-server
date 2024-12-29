@@ -1,4 +1,6 @@
-import { model, Schema } from 'mongoose';
+/* eslint-disable no-unused-vars */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { model, Query, Schema } from 'mongoose';
 import { TFaculty } from './faculty.interface';
 
 export const facultySchema = new Schema<TFaculty>(
@@ -42,12 +44,9 @@ export const facultySchema = new Schema<TFaculty>(
   { timestamps: true },
 );
 
-facultySchema.pre('find', function () {
+// For find-like operations
+facultySchema.pre(/^find/, function (this: Query<any, any>) {
   this.find({ isDeleted: { $ne: true } });
-});
-
-facultySchema.pre('findOne', function () {
-  this.findOne({ isDeleted: { $ne: true } });
 });
 
 export const FacultyModel = model<TFaculty>('Faculty', facultySchema);

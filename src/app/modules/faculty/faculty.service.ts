@@ -46,7 +46,7 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getAFacultyFromDB = async (id: string) => {
-  const result = await FacultyModel.findOne({ id, isDeleted: false });
+  const result = await FacultyModel.findById(id);
 
   if (!result) {
     throw new NotFoundError('Faculty not found!', [
@@ -63,18 +63,24 @@ const updateFacultyIntoDB = async (
   id: string,
   updateData: Partial<TFaculty>,
 ) => {
-  const result = await FacultyModel.findOneAndUpdate(
-    { id, isDeleted: false },
-    updateData,
-    {
-      new: true,
-    },
-  );
-  if (!result) {
+  const faculty = await FacultyModel.findById(id);
+  if (!faculty) {
     throw new NotFoundError('Faculty not found!', [
       {
         path: id,
         message: `The faculty with id: ${id} is not be found in the system.`,
+      },
+    ]);
+  }
+
+  const result = await FacultyModel.findByIdAndUpdate(id, updateData, {
+    new: true,
+  });
+  if (!result) {
+    throw new ConflictError('Could not update faculty!', [
+      {
+        path: id,
+        message: `The faculty with id: ${id} couldn't be updated. Please check you ID and data and try again.`,
       },
     ]);
   }
@@ -87,7 +93,7 @@ const deleteFacultyFromDB = async (id: string) => {
   try {
     session.startTransaction();
 
-    const faculty = await FacultyModel.findOne({ id: id, isDeleted: false });
+    const faculty = await FacultyModel.findById(id);
 
     if (!faculty) {
       throw new NotFoundError(`Faculty member not found!`, [
@@ -98,14 +104,14 @@ const deleteFacultyFromDB = async (id: string) => {
       ]);
     }
 
-    await UserModel.findOneAndUpdate(
-      { id },
+    await UserModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
 
-    const result = await FacultyModel.findOneAndUpdate(
-      { id },
+    const result = await FacultyModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -113,7 +119,7 @@ const deleteFacultyFromDB = async (id: string) => {
       throw new ConflictError(`Failed to deleted.`, [
         {
           path: id,
-          message: 'Failed to deleted the student. Transaction is aborted.',
+          message: 'Failed to deleted the faculty. Transaction is aborted.',
         },
       ]);
     }
