@@ -1,7 +1,27 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { model, Query, Schema } from 'mongoose';
-import { TFaculty } from './faculty.interface';
+import { TFaculty, TFacultyName } from './faculty.interface';
+
+const facultyNameSchema = new Schema<TFacultyName>({
+  firstName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [20, "First name can't have more than 20 characters"],
+  },
+  middleName: {
+    type: String,
+    trim: true,
+    maxlength: [20, "Middle name can't have more than 20 characters"],
+  },
+  lastName: {
+    type: String,
+    required: true,
+    trim: true,
+    maxlength: [20, "Last name can't have more than 20 characters"],
+  },
+});
 
 export const facultySchema = new Schema<TFaculty>(
   {
@@ -13,7 +33,7 @@ export const facultySchema = new Schema<TFaculty>(
       unique: true,
     },
     designation: { type: String, required: true },
-    name: { type: String, required: true },
+    name: { type: facultyNameSchema, required: true },
     gender: {
       type: String,
       enum: {
@@ -26,6 +46,13 @@ export const facultySchema = new Schema<TFaculty>(
     dateOfBirth: { type: Date },
     contactNo: { type: String, required: true, unique: true },
     emergencyContactNo: { type: String, required: true },
+    bloodGroup: {
+      type: String,
+      enum: {
+        values: ['A+', 'A-', 'B+', 'B-', 'AB+', 'AB-', 'O+', 'O-'],
+        message: '{VALUE} is not valid.',
+      },
+    },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
     profileImage: { type: String, required: true },

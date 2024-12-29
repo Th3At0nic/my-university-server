@@ -19,7 +19,7 @@ const getAFaculty = catchAsync(async (req, res, next) => {
 
 const updateFaculty = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const updatedData = req.body;
+  const { faculty: updatedData } = req.body;
   const result = await FacultyServices.updateFacultyIntoDB(id, updatedData);
   const message = 'Successfully updated the faculty';
   sendResponse(res, 200, true, message, result);

@@ -73,8 +73,19 @@ const updateFacultyIntoDB = async (
     ]);
   }
 
-  const result = await FacultyModel.findByIdAndUpdate(id, updateData, {
+  const { name, ...remainingData } = updateData;
+
+  const flattenedData: Record<string, unknown> = { ...remainingData };
+
+  if (name && Object.keys(name).length) {
+    for (const [key, value] of Object.entries(name)) {
+      flattenedData[`name.${key}`] = value;
+    }
+  }
+
+  const result = await FacultyModel.findByIdAndUpdate(id, flattenedData, {
     new: true,
+    runValidators: true,
   });
   if (!result) {
     throw new ConflictError('Could not update faculty!', [

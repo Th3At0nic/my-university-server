@@ -123,7 +123,7 @@ const updateStudentIntoDB = async (
   id: string,
   updatedData: Partial<TStudent>,
 ) => {
-  const student = await StudentModel.findByIdAndUpdate(id);
+  const student = await StudentModel.findById(id);
   if (!student || student.isDeleted) {
     throw new NotFoundError(`Student not found!`, [
       {
