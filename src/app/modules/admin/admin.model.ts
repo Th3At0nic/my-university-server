@@ -1,4 +1,6 @@
-import { model, Schema } from 'mongoose';
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable no-unused-vars */
+import { model, Query, Schema } from 'mongoose';
 import { TAdmin } from './admin.interface';
 
 const adminSchema = new Schema<TAdmin>(
@@ -34,12 +36,9 @@ const adminSchema = new Schema<TAdmin>(
   { timestamps: true },
 );
 
-adminSchema.pre('find', function () {
+// For find-like operations
+adminSchema.pre(/^find/, function (this: Query<any, any>) {
   this.find({ isDeleted: { $ne: true } });
-});
-
-adminSchema.pre('findOne', function () {
-  this.findOne({ isDeleted: { $ne: true } });
 });
 
 export const AdminModel = model<TAdmin>('Admin', adminSchema);

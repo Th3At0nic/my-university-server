@@ -37,10 +37,7 @@ const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getAnAdminFromDB = async (id: string) => {
-  const result = await AdminModel.findOne({
-    id: id,
-    isDeleted: false,
-  }).populate('managementDepartment');
+  const result = await AdminModel.findById(id).populate('managementDepartment');
   if (!result) {
     throw new NotFoundError('Admin not found!', [
       {
@@ -53,17 +50,27 @@ const getAnAdminFromDB = async (id: string) => {
 };
 
 const updateAdminIntoDB = async (id: string, updateData: Partial<TAdmin>) => {
-  const result = await AdminModel.findOneAndUpdate(
-    { id, isDeleted: false },
+  const admin = await AdminModel.findById(id);
+  if (!admin) {
+    throw new NotFoundError('Admin not found!', [
+      {
+        path: id,
+        message: `Admin not found with the provided id: ${id}`,
+      },
+    ]);
+  }
+
+  const result = await AdminModel.findByIdAndUpdate(
+    id,
     { $set: updateData },
     { new: true, runValidators: true },
   );
 
   if (!result) {
-    throw new NotFoundError('Admin not found!', [
+    throw new NotFoundError(`Couldn't update admin!`, [
       {
-        path: id || '',
-        message: `Admin not found with the provided id: ${id}. So not updated`,
+        path: id,
+        message: `Admin with the provided id: ${id} couldn't be updated`,
       },
     ]);
   }
@@ -77,25 +84,25 @@ const deleteAdminFromDB = async (id: string) => {
   try {
     session.startTransaction();
 
-    const admin = await AdminModel.findOne({ id: id, isDeleted: false });
+    const admin = await AdminModel.findById(id);
 
     if (!admin) {
       throw new NotFoundError(`Admin not found!`, [
         {
           path: `${id}`,
-          message: `No admin found with the provided ID: ${id}. The record may have been deleted or does not exist. Please verify the ID and try again.`,
+          message: `No admin found with the provided ID: ${id}. Please verify the ID and try again.`,
         },
       ]);
     }
 
-    await UserModel.findOneAndUpdate(
-      { id },
+    await UserModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
 
-    const result = await AdminModel.findOneAndUpdate(
-      { id },
+    const result = await AdminModel.findByIdAndUpdate(
+      id,
       { isDeleted: true },
       { new: true, session },
     );
@@ -103,7 +110,7 @@ const deleteAdminFromDB = async (id: string) => {
       throw new ConflictError(`Failed to deleted.`, [
         {
           path: id,
-          message: 'Failed to deleted the student. Transaction is aborted.',
+          message: 'Failed to deleted the admin. Transaction is aborted.',
         },
       ]);
     }
