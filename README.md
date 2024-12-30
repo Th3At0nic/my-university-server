@@ -8,7 +8,7 @@ This document presents the **Requirement Analysis** and the **Entity-Relationshi
 
 ![ER Diagram](src/app/images/University%20management%20DB%20model.png)
 
-This ER diagram shows the entities, their attributes, and the relationships between them. The diagram is a visual representation of the database schema, aiding in better system design and development.
+Description: This is an updated diagram illustrates the relationships among User, Student, Admin, Faculty, Academic Semester, Academic Faculty, Academic Department.
 
 ```
 
