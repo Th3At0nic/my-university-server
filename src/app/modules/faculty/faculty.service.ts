@@ -52,7 +52,7 @@ const getAFacultyFromDB = async (id: string) => {
     throw new NotFoundError('Faculty not found!', [
       {
         path: id,
-        message: `The faculty with id: ${id} is not be found in the system.`,
+        message: `The faculty with id: ${id} is not found in the system.`,
       },
     ]);
   }
@@ -68,7 +68,7 @@ const updateFacultyIntoDB = async (
     throw new NotFoundError('Faculty not found!', [
       {
         path: id,
-        message: `The faculty with id: ${id} is not be found in the system.`,
+        message: `The faculty with id: ${id} is not found in the system.`,
       },
     ]);
   }
