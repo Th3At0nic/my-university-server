@@ -20,7 +20,11 @@ const createCourseIntoDB = async (payload: TCourse) => {
   }
 
   const result = await CourseModel.create(payload);
-  return result;
+
+  const populatedResult = await CourseModel.findById(result._id).populate(
+    'preRequisiteCourses.course',
+  );
+  return populatedResult;
 };
 
 const getAllCoursesFromDB = async (query: Record<string, unknown>) => {
