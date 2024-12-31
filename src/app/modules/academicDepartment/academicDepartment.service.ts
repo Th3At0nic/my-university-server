@@ -5,7 +5,11 @@ import { DepartmentModel } from './academicDepartment.model';
 
 const createAcademicDepartmentIntoDB = async (data: TAcademicDepartment) => {
   const result = await DepartmentModel.create(data);
-  return result;
+
+  const populatedResult = await DepartmentModel.findById(result._id).populate(
+    'academicFaculty',
+  );
+  return populatedResult;
 };
 
 const getAllAcademicDepartmentFromDB = async (
