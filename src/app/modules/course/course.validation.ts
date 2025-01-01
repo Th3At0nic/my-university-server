@@ -60,14 +60,11 @@ export const updateCourseValidation = z.object({
 });
 
 export const courseFacultyValidationSchema = z.object({
-  course: z.string().refine((value) => /^[0-9a-fA-F]{24}$/.test(value), {
-    message: 'Invalid ObjectId for course',
-  }), // Ensures it's a valid ObjectId
-  faculties: z
-    .array(
+  body: z.object({
+    faculties: z.array(
       z.string().refine((value) => /^[0-9a-fA-F]{24}$/.test(value), {
         message: 'Invalid ObjectId for faculty',
       }),
-    )
-    .optional(), // Faculties can be optional
+    ),
+  }),
 });

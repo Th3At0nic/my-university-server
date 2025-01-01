@@ -3,7 +3,7 @@ import { QueryBuilder } from '../../builder/QueryBuilder';
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { TCourse, TCourseFaculty } from './course.interface';
-import { CourseModel } from './course.model';
+import { CourseFacultyModel, CourseModel } from './course.model';
 
 const createCourseIntoDB = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({
@@ -188,9 +188,10 @@ const assignFacultiesToCourseIntoDB = async (
   id: string,
   payload: Partial<TCourseFaculty>,
 ) => {
-  const result = await CourseModel.findByIdAndUpdate(
+  const result = await CourseFacultyModel.findByIdAndUpdate(
     id,
     {
+      course: id,
       $addToSet: { faculties: { $each: payload } },
     },
     {
@@ -208,7 +209,11 @@ const assignFacultiesToCourseIntoDB = async (
     ]);
   }
 
-  return result;
+  const populatedResult = await CourseFacultyModel.findById(
+    result._id,
+  ).populate(['course', 'faculties']);
+
+  return populatedResult;
 };
 
 export const CourseServices = {
