@@ -1,3 +1,4 @@
+import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
@@ -67,40 +68,93 @@ const getACourseFromDB = async (id: string) => {
 };
 
 const updateCourseIntoDB = async (id: string, payload: Partial<TCourse>) => {
-  const { preRequisiteCourses, ...remainingData } = payload;
-  // const updateBasicCourseInfo =
-  await CourseModel.findByIdAndUpdate(id, remainingData, {
-    new: true,
-    runValidators: true,
-  });
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
 
-  if (preRequisiteCourses && preRequisiteCourses.length > 0) {
-    const prerequisitesToDelete = preRequisiteCourses
-      .filter((el) => el.course && el.isDeleted)
-      .map((el) => el.course);
-
-    // const deletePrerequisitesFromDB =
-    await CourseModel.findByIdAndUpdate(id, {
-      $pull: {
-        preRequisiteCourses: { course: { $in: prerequisitesToDelete } },
+    const { preRequisiteCourses, ...remainingData } = payload;
+    const updatedCourse = await CourseModel.findByIdAndUpdate(
+      id,
+      remainingData,
+      {
+        new: true,
+        runValidators: true,
+        session,
       },
-    });
+    );
+    if (!updatedCourse) {
+      throw new NotFoundError('Course not found', [
+        {
+          path: 'id',
+          message: `Course not found with the id : ${id} or something went wrong to update`,
+        },
+      ]);
+    }
+
+    if (preRequisiteCourses && preRequisiteCourses.length > 0) {
+      const prerequisitesToDelete = preRequisiteCourses
+        .filter((el) => el.course && el.isDeleted)
+        .map((el) => el.course);
+
+      const deletedPrerequisites = await CourseModel.findByIdAndUpdate(
+        id,
+        {
+          $pull: {
+            preRequisiteCourses: { course: { $in: prerequisitesToDelete } },
+          },
+        },
+        { new: true, runValidators: true, session },
+      );
+      if (!deletedPrerequisites) {
+        throw new ConflictError('Failed to delete prerequisites', [
+          {
+            path: 'preRequisiteCourses',
+            message: 'Could not remove specified preRequisites.',
+          },
+        ]);
+      }
+    }
+
+    const newPreRequisites = preRequisiteCourses?.filter(
+      (el) => el.course && !el.isDeleted,
+    );
+
+    const addNewPreRequisites = await CourseModel.findByIdAndUpdate(
+      id,
+      {
+        $addToSet: { preRequisiteCourses: { $each: newPreRequisites } },
+      },
+      { new: true, runValidators: true, session },
+    );
+    if (!addNewPreRequisites) {
+      throw new ConflictError('Failed to add new prerequisites', [
+        {
+          path: 'preRequisiteCourses',
+          message: 'Could not add new preRequisites.',
+        },
+      ]);
+    }
+
+    const result = await CourseModel.findById(id).populate(
+      'preRequisiteCourses.course',
+    );
+    if (!result) {
+      throw new NotFoundError('Updated course not found', [
+        {
+          path: 'id',
+          message: `Unable to find updated course with ID: ${id}.`,
+        },
+      ]);
+    }
+
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
   }
-
-  const newPreRequisites = preRequisiteCourses?.filter(
-    (el) => el.course && !el.isDeleted,
-  );
-
-  // const addNewPreRequisiteCourses =
-  await CourseModel.findByIdAndUpdate(id, {
-    $addToSet: { preRequisiteCourses: { $each: newPreRequisites } },
-  });
-
-  const result = await CourseModel.findById(id).populate(
-    'preRequisiteCourses.course',
-  );
-
-  return result;
 };
 
 const deleteCourseFromDB = async (id: string) => {
