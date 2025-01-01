@@ -2,7 +2,7 @@ import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
-import { TCourse } from './course.interface';
+import { TCourse, TCourseFaculty } from './course.interface';
 import { CourseModel } from './course.model';
 
 const createCourseIntoDB = async (payload: TCourse) => {
@@ -184,10 +184,38 @@ const deleteCourseFromDB = async (id: string) => {
   return result;
 };
 
+const assignFacultiesToCourseIntoDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseModel.findByIdAndUpdate(
+    id,
+    {
+      $addToSet: { faculties: { $each: payload } },
+    },
+    {
+      new: true,
+      upsert: true,
+      runValidators: true,
+    },
+  );
+  if (!result) {
+    throw new NotFoundError('Course not found!', [
+      {
+        path: 'id',
+        message: `The course not found with the id: ${id}`,
+      },
+    ]);
+  }
+
+  return result;
+};
+
 export const CourseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
   getACourseFromDB,
   updateCourseIntoDB,
   deleteCourseFromDB,
+  assignFacultiesToCourseIntoDB,
 };
