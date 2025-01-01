@@ -13,3 +13,7 @@ Description: This is an updated diagram illustrates the relationships among User
 ```
 
 ```
+
+![ER Diagram](src/app/images/University%20management%20DB%20model-final.png)
+
+Description: This is an updated final diagram
