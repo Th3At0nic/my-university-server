@@ -216,6 +216,36 @@ const assignFacultiesToCourseIntoDB = async (
   return populatedResult;
 };
 
+const removeFacultiesFromCourseFromDB = async (
+  id: string,
+  payload: Partial<TCourseFaculty>,
+) => {
+  const result = await CourseFacultyModel.findByIdAndUpdate(
+    id,
+    {
+      $pull: { faculties: { $in: payload } },
+    },
+    {
+      new: true,
+      runValidators: true,
+    },
+  );
+  if (!result) {
+    throw new NotFoundError('Course not found!', [
+      {
+        path: 'id',
+        message: `The course not found with the id: ${id}`,
+      },
+    ]);
+  }
+
+  const populatedResult = await CourseFacultyModel.findById(
+    result._id,
+  ).populate(['course', 'faculties']);
+
+  return populatedResult;
+};
+
 export const CourseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
@@ -223,4 +253,5 @@ export const CourseServices = {
   updateCourseIntoDB,
   deleteCourseFromDB,
   assignFacultiesToCourseIntoDB,
+  removeFacultiesFromCourseFromDB,
 };
