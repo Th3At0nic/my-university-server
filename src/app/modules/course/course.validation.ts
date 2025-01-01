@@ -30,3 +30,31 @@ export const CourseValidationSchema = z.object({
       .optional(),
   }),
 });
+
+export const updateCourseValidation = z.object({
+  body: z.object({
+    title: z
+      .string()
+      .trim()
+      .min(1, { message: 'Title is required' })
+      .max(255, { message: "Title can't exceed 255 characters" })
+      .optional(),
+    prefix: z
+      .string()
+      .trim()
+      .min(1, { message: 'Prefix is required' })
+      .max(50, { message: "Prefix can't exceed 50 characters" })
+      .optional(),
+    code: z
+      .number({ required_error: 'Code is required' })
+      .int({ message: 'Code must be an integer' })
+      .optional(),
+    credits: z
+      .number({ required_error: 'Credits are required' })
+      .int({ message: 'Credits must be an integer' })
+      .optional(),
+    preRequisiteCourses: z
+      .array(PreRequisiteCoursesValidationSchema)
+      .optional(),
+  }),
+});
