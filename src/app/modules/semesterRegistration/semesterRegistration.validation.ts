@@ -30,3 +30,8 @@ export const SemesterRegistrationValidationSchema = z.object({
     }),
   }),
 });
+
+// Zod validation for Semester Registration (Update)
+export const UpdateSemesterRegistrationValidationSchema = z.object({
+  body: SemesterRegistrationValidationSchema.shape.body.partial(),
+});
