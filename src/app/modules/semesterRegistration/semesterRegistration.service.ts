@@ -3,6 +3,7 @@ import { ConflictError } from '../../utils/errors/ConflictError';
 import { InternalServerError } from '../../utils/errors/InternalServerError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { SemesterModel } from '../academicSemester/academicSemester.model';
+import { registrationStatus } from './semesterRegistration.constant';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistrationModel } from './semesterRegistration.model';
 
@@ -12,7 +13,10 @@ const createSemesterRegistrationIntoDB = async (
   const academicSemesterId = payload?.academicSemester;
 
   const isUpcomingOrOngoingSemExists = await SemesterRegistrationModel.findOne({
-    $or: [{ status: 'UPCOMING' }, { status: 'ONGOING' }],
+    $or: [
+      { status: registrationStatus.UPCOMING },
+      { status: registrationStatus.ONGOING },
+    ],
   });
 
   if (isUpcomingOrOngoingSemExists) {
@@ -114,7 +118,11 @@ const updateRegisteredSemesterIntoDB = async (
   id: string,
   payload: Partial<TSemesterRegistration>,
 ) => {
+  const requestedStatus = payload.status;
+
   const isSemesterExists = await SemesterRegistrationModel.findById(id);
+
+  const currentSemesterStatus = isSemesterExists?.status;
 
   if (!isSemesterExists) {
     throw new NotFoundError(`Semester not found with ID: ${id}`, [
@@ -124,12 +132,27 @@ const updateRegisteredSemesterIntoDB = async (
           'The specified Academic Semester does not exist in the system. Please check and provide a valid semester ID.',
       },
     ]);
-  } else if (isSemesterExists?.status === 'ENDED') {
+  } else if (currentSemesterStatus === registrationStatus.ENDED) {
     throw new ConflictError('Cannot update an ended semester', [
       {
         path: 'status',
         message:
           'The specified Academic Semester has already ended and cannot be updated. Please provide a valid semester ID for a semester that has not ended.',
+      },
+    ]);
+  }
+
+  if (
+    (currentSemesterStatus === registrationStatus.UPCOMING &&
+      requestedStatus === registrationStatus.ENDED) ||
+    //using both logic with OR and avoiding using else if method, reduce codes
+    (currentSemesterStatus === registrationStatus.ONGOING &&
+      requestedStatus === registrationStatus.UPCOMING)
+  ) {
+    throw new ConflictError('Invalid status transition', [
+      {
+        path: 'status',
+        message: `The status flow is invalid. An ${currentSemesterStatus} semester cannot be directly transitioned to ${requestedStatus}. The status must follow the sequence: UPCOMING → ONGOING → ENDED.`,
       },
     ]);
   }
