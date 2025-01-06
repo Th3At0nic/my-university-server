@@ -17,11 +17,6 @@ export const OfferedCourseValidationSchema = z.object({
       .refine((id) => id.match(/^[a-fA-F0-9]{24}$/), {
         message: 'Invalid ObjectId format for Academic Department',
       }),
-    academicSemester: z
-      .string({ required_error: 'Academic Semester ID is required' })
-      .refine((id) => id.match(/^[a-fA-F0-9]{24}$/), {
-        message: 'Invalid ObjectId format for Academic Semester',
-      }),
     course: z
       .string({ required_error: 'Course ID is required' })
       .refine((id) => id.match(/^[a-fA-F0-9]{24}$/), {
