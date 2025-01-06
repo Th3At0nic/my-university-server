@@ -3,8 +3,77 @@ import { TOfferedCourse } from './offeredCourse.interface';
 import { InternalServerError } from '../../utils/errors/InternalServerError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { ConflictError } from '../../utils/errors/ConflictError';
+import { DepartmentModel } from '../academicDepartment/academicDepartment.model';
+import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegistration.model';
+import { CourseModel } from '../course/course.model';
+import { FacultyModel } from '../faculty/faculty.model';
+import { AcademicFacultyModel } from '../academicFaculty/academicFaculty.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
+  const {
+    academicDepartment,
+    academicFaculty,
+    faculty,
+    course,
+    semesterRegistration,
+  } = payload;
+
+  const isCourseExists = await CourseModel.findById(course);
+  if (!isCourseExists) {
+    throw new NotFoundError('Course Not Found', [
+      {
+        path: `course`,
+        message: `The specified course ID: ${course} does not exist in the system. Please verify the ID and try again`,
+      },
+    ]);
+  }
+
+  const isFacultyExists = await FacultyModel.findById(faculty);
+  if (!isFacultyExists) {
+    throw new NotFoundError('Faculty Not Found', [
+      {
+        path: `faculty`,
+        message: `The specified faculty ID: ${faculty} does not exist in the system. Please verify the ID and try again`,
+      },
+    ]);
+  }
+
+  const isAcademicFacultyExists =
+    await AcademicFacultyModel.findById(academicFaculty);
+  if (!isAcademicFacultyExists) {
+    throw new NotFoundError('Academic Faculty Not Found', [
+      {
+        path: `academicFaculty`,
+        message: `The specified academic faculty ID: ${academicFaculty} does not exist in the system. Please verify the ID and try again`,
+      },
+    ]);
+  }
+
+  const isDepartmentExists = await DepartmentModel.findById(academicDepartment);
+  if (!isDepartmentExists) {
+    throw new NotFoundError('Academic Department Not Found', [
+      {
+        path: 'academicDepartment',
+        message: `The specified Academic Department not found with provided ID: ${academicDepartment}. Please check the ID and try again`,
+      },
+    ]);
+  }
+
+  const isSemesterRegistered =
+    await SemesterRegistrationModel.findById(semesterRegistration);
+  if (!isSemesterRegistered) {
+    throw new NotFoundError('Semester Registration Not Found', [
+      {
+        path: 'semesterRegistration',
+        message: `The specified Semester Registration ID: ${semesterRegistration} does not exist in the system. Please verify the ID and try again.`,
+      },
+    ]);
+  }
+
+  if (isSemesterRegistered) {
+    payload.academicSemester = isSemesterRegistered.academicSemester;
+  }
+
   const result = await OfferedCourseModel.create(payload);
 
   if (!result) {
