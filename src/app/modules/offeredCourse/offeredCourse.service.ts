@@ -198,8 +198,8 @@ const updateOfferedCourseIntoDB = async (
     );
   }
 
-  const isCourseExists = await OfferedCourseModel.findById(id);
-  if (!isCourseExists) {
+  const isOfferedCourseExists = await OfferedCourseModel.findById(id);
+  if (!isOfferedCourseExists) {
     throw new NotFoundError('Offered Course Not Found', [
       {
         path: 'id',
@@ -207,6 +207,68 @@ const updateOfferedCourseIntoDB = async (
           'The specified Offered Course does not exist in the system. Please check the ID and try again.',
       },
     ]);
+  }
+
+  const { faculty, startTime, endTime, days } = payload;
+
+  const isFacultyExists = await FacultyModel.findById(faculty);
+  if (!isFacultyExists) {
+    throw new NotFoundError('Faculty Member Not Found', [
+      {
+        path: 'faculty',
+        message: `The Faculty Member with ID: ${payload.faculty} was not found in the system. Please verify the ID and try again.`,
+      },
+    ]);
+  }
+
+  const semesterRegistration = isOfferedCourseExists.semesterRegistration;
+
+  const registeredSemesterData =
+    await SemesterRegistrationModel.findById(semesterRegistration);
+
+  if (registeredSemesterData?.status !== 'UPCOMING') {
+    throw new ConflictError('Cannot update, semester is not upcoming', [
+      {
+        path: 'semesterRegistration',
+        message: `The semester with ID: ${semesterRegistration} is not in the "UPCOMING" status. Updates can only be made for semesters that are in the "UPCOMING" status.`,
+      },
+    ]);
+  }
+
+  const assignedSchedules = await OfferedCourseModel.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select('days startTime endTime');
+
+  // Early check for no schedules to avoid unnecessary conflict check
+  if (!assignedSchedules || assignedSchedules.length === 0) {
+    throw new ConflictError('No existing schedules found', [
+      {
+        path: 'days, startTime, endTime',
+        message:
+          'The specified faculty member has no existing schedules to check for conflicts.',
+      },
+    ]);
+  }
+
+  if (startTime && endTime && days) {
+    const newSchedules = {
+      startTime,
+      endTime,
+      days,
+    };
+
+    const hasConflict = hasTimeConflict(assignedSchedules, newSchedules);
+
+    if (hasConflict?.conflict) {
+      throw new ConflictError('Time conflict detected', [
+        {
+          path: 'startTime, endTime',
+          message: `The faculty member already has a class scheduled on this time on the same days. Please choose a different time or day.`,
+        },
+      ]);
+    }
   }
 
   const result = await OfferedCourseModel.findByIdAndUpdate(id, payload, {
