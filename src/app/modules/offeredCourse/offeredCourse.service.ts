@@ -16,6 +16,9 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     faculty,
     section,
     course,
+    days,
+    startTime,
+    endTime,
     semesterRegistration,
   } = payload;
 
@@ -89,6 +92,35 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
       },
     ]);
   }
+
+  const assignedSchedules = await OfferedCourseModel.find({
+    semesterRegistration,
+    faculty,
+    days: { $in: days },
+  }).select('days startTime endTime');
+
+  const newSchedules = {
+    startTime,
+    endTime,
+    days,
+  };
+
+  assignedSchedules.forEach((schedule) => {
+    const existingStartTime = schedule.startTime;
+    const existingEndTime = schedule.endTime;
+    const newStartTime = newSchedules.startTime;
+    const newEndTime = newSchedules.endTime;
+
+    // Check for time conflict
+    if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
+      throw new ConflictError('Time conflict detected', [
+        {
+          path: 'startTime, endTime',
+          message: `The faculty member already has a class scheduled from ${existingStartTime} to ${existingEndTime} on the same days. Please choose a different time.`,
+        },
+      ]);
+    }
+  });
 
   const isSemesterRegistered =
     await SemesterRegistrationModel.findById(semesterRegistration);
