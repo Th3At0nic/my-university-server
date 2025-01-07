@@ -14,6 +14,7 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     academicDepartment,
     academicFaculty,
     faculty,
+    section,
     course,
     semesterRegistration,
   } = payload;
@@ -55,6 +56,36 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
       {
         path: 'academicDepartment',
         message: `The specified Academic Department not found with provided ID: ${academicDepartment}. Please check the ID and try again`,
+      },
+    ]);
+  }
+
+  const DepartmentBelongToFaculty = isDepartmentExists.academicFaculty;
+
+  if (DepartmentBelongToFaculty.toString() !== academicFaculty.toString()) {
+    throw new NotFoundError(
+      `The Academic Department is not belong to the Academic Faculty`,
+      [
+        {
+          path: `academicDepartment & academicFaculty`,
+          message: `${isDepartmentExists?.name} is not belong to the ${isAcademicFacultyExists.name}`,
+        },
+      ],
+    );
+  }
+
+  // finding any same offered course with the same registered semester and same section
+  const isDuplicateSectionInSemester = await OfferedCourseModel.findOne({
+    semesterRegistration,
+    course,
+    section,
+  });
+  // checking if the offeredCourse in the same register semester and section is duplicate or not..
+  if (isDuplicateSectionInSemester) {
+    throw new ConflictError('Duplicate Section Detected', [
+      {
+        path: 'section',
+        message: `The section '${section}' for course '${course}' in semester '${semesterRegistration}' already exists. Please provide a unique section.`,
       },
     ]);
   }
