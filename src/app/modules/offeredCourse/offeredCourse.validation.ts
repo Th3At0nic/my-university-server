@@ -64,7 +64,14 @@ export const updateOfferedCourseValidationSchema = z.object({
       })
       .optional(),
     section: z.number().optional(),
-    days: z.enum(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']).optional(),
+    days: z
+      .array(
+        z.enum(['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'], {
+          required_error: 'Days are required',
+        }),
+      )
+      .nonempty({ message: 'At least one day must be selected' })
+      .optional(),
     startTime: z
       .string({ required_error: 'Start Time is required' })
       .refine((time) => /^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/.test(time), {

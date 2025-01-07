@@ -119,6 +119,27 @@ const updateOfferedCourseIntoDB = async (
   id: string,
   payload: Partial<TOfferedCourse>,
 ) => {
+  const restrictedFields = [
+    'academicDepartment',
+    'academicFaculty',
+    'academicSemester',
+    'course',
+  ];
+
+  const invalidFields = restrictedFields.filter(
+    (field) => payload[field as keyof typeof payload],
+  );
+
+  if (invalidFields.length > 0) {
+    throw new ConflictError(
+      `${invalidFields.join(', ')} field(s) cannot be updated as they are restricted.`,
+      invalidFields.map((field) => ({
+        path: field,
+        message: `${field} is a restricted field and cannot be updated.`,
+      })),
+    );
+  }
+
   const isCourseExists = await OfferedCourseModel.findById(id);
   if (!isCourseExists) {
     throw new NotFoundError('Offered Course Not Found', [
