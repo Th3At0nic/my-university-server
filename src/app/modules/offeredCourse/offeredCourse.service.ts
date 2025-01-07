@@ -8,6 +8,7 @@ import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegis
 import { CourseModel } from '../course/course.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { AcademicFacultyModel } from '../academicFaculty/academicFaculty.model';
+import { hasTimeConflict } from './offeredCourse.utils';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -105,22 +106,16 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
     days,
   };
 
-  assignedSchedules.forEach((schedule) => {
-    const existingStartTime = schedule.startTime;
-    const existingEndTime = schedule.endTime;
-    const newStartTime = newSchedules.startTime;
-    const newEndTime = newSchedules.endTime;
+  const hasConflict = hasTimeConflict(assignedSchedules, newSchedules);
 
-    // Check for time conflict
-    if (newStartTime < existingEndTime && newEndTime > existingStartTime) {
-      throw new ConflictError('Time conflict detected', [
-        {
-          path: 'startTime, endTime',
-          message: `The faculty member already has a class scheduled from ${existingStartTime} to ${existingEndTime} on the same days. Please choose a different time.`,
-        },
-      ]);
-    }
-  });
+  if (hasConflict?.conflict) {
+    throw new ConflictError('Time conflict detected', [
+      {
+        path: 'startTime, endTime',
+        message: `The faculty member already has a class scheduled on this time on the same days. Please choose a different time or day.`,
+      },
+    ]);
+  }
 
   const isSemesterRegistered =
     await SemesterRegistrationModel.findById(semesterRegistration);
