@@ -9,6 +9,7 @@ import { CourseModel } from '../course/course.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { AcademicFacultyModel } from '../academicFaculty/academicFaculty.model';
 import { hasTimeConflict } from './offeredCourse.utils';
+import { TSemesterRegistration } from '../semesterRegistration/semesterRegistration.interface';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -289,9 +290,68 @@ const updateOfferedCourseIntoDB = async (
   return result;
 };
 
+const deleteOfferedCourseFromDB = async (id: string) => {
+  const isOfferedCourseExists = await OfferedCourseModel.findById(
+    id,
+  ).populate<TSemesterRegistration>('semesterRegistration');
+
+  if (!isOfferedCourseExists) {
+    throw new NotFoundError('Offered Course Not Found', [
+      {
+        path: 'id',
+        message: 'No offered course found with the provided ID.',
+      },
+    ]);
+  }
+
+  //by using populate i avoided further query on the DB, enhance performance
+  const registeredSemesterID = isOfferedCourseExists?.semesterRegistration;
+
+  if (!registeredSemesterID) {
+    throw new NotFoundError('Registered Semester Not Found', [
+      {
+        path: 'semesterRegistration',
+        message: `No registered semester found with the provided ID: ${id}. Deletion of the offered course is not allowed.`,
+      },
+    ]);
+  }
+
+  const isRegisteredSemesterExists =
+    await SemesterRegistrationModel.findById(registeredSemesterID);
+
+  const registeredSemesterStatus = isRegisteredSemesterExists?.status;
+
+  if (registeredSemesterStatus !== 'UPCOMING') {
+    throw new ConflictError(
+      `Cannot delete, semester is ${registeredSemesterStatus}`,
+      [
+        {
+          path: 'semesterRegistration',
+          message: `Cannot delete. The semester status is "${registeredSemesterStatus}", but only "UPCOMING" semesters can be deleted.
+`,
+        },
+      ],
+    );
+  }
+
+  const result = await OfferedCourseModel.findByIdAndDelete(id);
+
+  if (!result) {
+    throw new ConflictError('Deletion Failed', [
+      {
+        path: 'id',
+        message: 'Failed to delete the offered course due to a conflict.',
+      },
+    ]);
+  }
+
+  return result;
+};
+
 export const OfferedCourseServices = {
   createOfferedCourseIntoDB,
   getAllOfferedCoursesFromDB,
   getAOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
+  deleteOfferedCourseFromDB,
 };
