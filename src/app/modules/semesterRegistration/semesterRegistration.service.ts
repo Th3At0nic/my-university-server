@@ -1,8 +1,10 @@
+import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { InternalServerError } from '../../utils/errors/InternalServerError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { SemesterModel } from '../academicSemester/academicSemester.model';
+import { OfferedCourseModel } from '../offeredCourse/offeredCourse.model';
 import { registrationStatus } from './semesterRegistration.constant';
 import { TSemesterRegistration } from './semesterRegistration.interface';
 import { SemesterRegistrationModel } from './semesterRegistration.model';
@@ -129,7 +131,7 @@ const updateRegisteredSemesterIntoDB = async (
       {
         path: 'id',
         message:
-          'The specified Academic Semester does not exist in the system. Please check and provide a valid semester ID.',
+          'The specified Semester is not registered in the system. Please check and provide a valid semester ID.',
       },
     ]);
   } else if (currentSemesterStatus === registrationStatus.ENDED) {
@@ -137,7 +139,7 @@ const updateRegisteredSemesterIntoDB = async (
       {
         path: 'status',
         message:
-          'The specified Academic Semester has already ended and cannot be updated. Please provide a valid semester ID for a semester that has not ended.',
+          'The specified Registered Semester has already ended and cannot be updated. Please provide a valid semester ID for a semester that has not ended.',
       },
     ]);
   }
@@ -166,9 +168,79 @@ const updateRegisteredSemesterIntoDB = async (
   return result;
 };
 
+const deleteRegisteredSemesterFromDB = async (id: string) => {
+  const session = await mongoose.startSession();
+  try {
+    session.startTransaction();
+
+    const isSemesterExists =
+      await SemesterRegistrationModel.findById(id).session(session);
+
+    if (!isSemesterExists) {
+      throw new NotFoundError(
+        `Semester Registration not found with ID: ${id}`,
+        [
+          {
+            path: 'id',
+            message:
+              'The specified Semester is not registered in the system. Please check and provide a valid semester ID.',
+          },
+        ],
+      );
+    }
+
+    const currentSemesterStatus = isSemesterExists?.status;
+    if (currentSemesterStatus !== registrationStatus.UPCOMING) {
+      throw new ConflictError('Deletion Not Allowed', [
+        {
+          path: 'status',
+          message: `The registered semester cannot be deleted because its status is "${currentSemesterStatus}". Only semesters with the status "UPCOMING" are eligible for deletion.`,
+        },
+      ]);
+    }
+
+    const deleteAllAssociatedOfferedCourse =
+      await OfferedCourseModel.deleteMany(
+        {
+          semesterRegistration: id,
+        },
+        { session },
+      );
+    if (deleteAllAssociatedOfferedCourse.deletedCount === 0) {
+      throw new NotFoundError('No Offered Courses Found', [
+        {
+          path: 'semesterRegistration',
+          message: `No offered courses were found associated with the registered semester ID: ${id}. Deletion failed.`,
+        },
+      ]);
+    }
+
+    const result = await SemesterRegistrationModel.findByIdAndDelete(id, {
+      session,
+    });
+
+    if (!result) {
+      throw new NotFoundError('Registered Semester Not Found', [
+        {
+          path: 'id',
+          message: `No registered semester found with the provided ID: ${id}. Deletion failed.`,
+        },
+      ]);
+    }
+    await session.commitTransaction();
+    return result;
+  } catch (err) {
+    await session.abortTransaction();
+    throw err;
+  } finally {
+    session.endSession();
+  }
+};
+
 export const SemesterRegistrationServices = {
   createSemesterRegistrationIntoDB,
   getAllRegisteredSemestersFromDB,
   getARegisteredSemesterFromDB,
   updateRegisteredSemesterIntoDB,
+  deleteRegisteredSemesterFromDB,
 };
