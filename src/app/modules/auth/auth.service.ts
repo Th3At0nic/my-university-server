@@ -1,13 +1,13 @@
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { UnauthorizedError } from '../../utils/errors/UnauthorizedError';
 import { UserModel } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
-import bcrypt from 'bcrypt';
 
 const loginUserAuth = async (payload: TLoginUser) => {
-  const { id, password } = payload;
+  const { id, password: userGivenPassword } = payload;
 
-  const isUserExists = await UserModel.findOne({ id: id });
+  const isUserExists = await UserModel.isUserExists(id);
 
   if (!isUserExists) {
     throw new NotFoundError('User Not Found!', [
@@ -38,8 +38,19 @@ const loginUserAuth = async (payload: TLoginUser) => {
     ]);
   }
 
-  const checkPassword = await bcrypt.compare(password, isUserExists?.password);
-  console.log('ekhane password chek kora hoy: ', checkPassword);
+  const isPasswordValid = await UserModel.isPasswordCorrect(
+    userGivenPassword,
+    isUserExists?.password,
+  );
+
+  if (!isPasswordValid) {
+    throw new UnauthorizedError('Invalid Credentials', [
+      {
+        path: 'password',
+        message: 'The provided password is incorrect. Please try again.',
+      },
+    ]);
+  }
 
   return isUserExists;
 };
