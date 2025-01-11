@@ -45,4 +45,12 @@ userSchema.statics.isUserExists = async function (id: string) {
   return existingUser;
 };
 
+userSchema.statics.isPasswordCorrect = async function (
+  plainTextPassword: string,
+  hashPassword: string,
+) {
+  const authPassword = await bcrypt.compare(plainTextPassword, hashPassword);
+  return authPassword;
+};
+
 export const UserModel = model<TUser, IUser>('User', userSchema);
