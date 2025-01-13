@@ -5,21 +5,33 @@ import {
   UpdateAcademicDepartmentValidation,
 } from './academicDepartment.validation';
 import { AcademicDepartmentControllers } from './academicDepartment.controller';
+import { auth } from '../../middlewares/authRequest';
+import { USER_ROLE } from '../user/user.constant';
 
 const router = Router();
 
 router.post(
   '/create-academic-department',
+  auth(USER_ROLE.admin),
   validateRequest(AcademicDepartmentValidation),
   AcademicDepartmentControllers.createAcademicDepartment,
 );
 
-router.get('/', AcademicDepartmentControllers.getAllAcademicDepartment);
+router.get(
+  '/',
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  AcademicDepartmentControllers.getAllAcademicDepartment,
+);
 
-router.get('/:id', AcademicDepartmentControllers.getAnAcademicDepartment);
+router.get(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  AcademicDepartmentControllers.getAnAcademicDepartment,
+);
 
 router.patch(
   '/:id',
+  auth(USER_ROLE.admin),
   validateRequest(UpdateAcademicDepartmentValidation),
   AcademicDepartmentControllers.updateAcademicDepartment,
 );
