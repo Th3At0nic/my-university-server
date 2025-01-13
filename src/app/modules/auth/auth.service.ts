@@ -1,15 +1,17 @@
+import config from '../../config';
 import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { UnauthorizedError } from '../../utils/errors/UnauthorizedError';
 import { UserModel } from '../user/user.model';
 import { TLoginUser } from './auth.interface';
+import jwt from 'jsonwebtoken';
 
 const loginUserAuth = async (payload: TLoginUser) => {
   const { id, password: userGivenPassword } = payload;
 
-  const isUserExists = await UserModel.isUserExists(id);
+  const user = await UserModel.isUserExists(id);
 
-  if (!isUserExists) {
+  if (!user) {
     throw new NotFoundError('User Not Found!', [
       {
         path: 'id',
@@ -18,7 +20,7 @@ const loginUserAuth = async (payload: TLoginUser) => {
     ]);
   }
 
-  const isUserDeleted = isUserExists?.isDeleted;
+  const isUserDeleted = user?.isDeleted;
   if (isUserDeleted) {
     throw new NotFoundError('User Not Found!', [
       {
@@ -28,7 +30,7 @@ const loginUserAuth = async (payload: TLoginUser) => {
     ]);
   }
 
-  const isUserBlocked = isUserExists?.status;
+  const isUserBlocked = user?.status;
   if (isUserBlocked === 'blocked') {
     throw new ConflictError('User is Blocked', [
       {
@@ -40,7 +42,7 @@ const loginUserAuth = async (payload: TLoginUser) => {
 
   const isPasswordValid = await UserModel.isPasswordCorrect(
     userGivenPassword,
-    isUserExists?.password,
+    user?.password,
   );
 
   if (!isPasswordValid) {
@@ -52,7 +54,24 @@ const loginUserAuth = async (payload: TLoginUser) => {
     ]);
   }
 
-  return isUserExists;
+  const jwtPayload = {
+    userID: user.id,
+    role: user.role,
+  };
+
+  //create access token and send it to the client
+  const accessToken = jwt.sign(
+    {
+      data: jwtPayload,
+    },
+    config.jwt_access_secret as string,
+    { expiresIn: '10d' },
+  );
+
+  return {
+    accessToken,
+    needPasswordChange: user.needsPasswordChange,
+  };
 };
 
 export const LoginUserServices = {
