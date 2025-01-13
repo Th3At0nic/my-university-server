@@ -2,17 +2,28 @@ import express from 'express';
 import { studentController } from './student.controller';
 import { validateRequest } from '../../middlewares/validateRequest';
 import { updateStudentValidationSchema } from './student.validation';
+import { auth } from '../../middlewares/authRequest';
+import { USER_ROLE } from '../user/user.constant';
 
 const router = express.Router();
 
-router.get('/', studentController.getAllStudents);
+router.get(
+  '/',
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  studentController.getAllStudents,
+);
 
-router.get('/:id', studentController.getSingleStudent);
+router.get(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  studentController.getSingleStudent,
+);
 
-router.delete('/:id', studentController.deleteStudent);
+router.delete('/:id', auth(USER_ROLE.admin), studentController.deleteStudent);
 
 router.patch(
   '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
   validateRequest(updateStudentValidationSchema),
   studentController.updateStudent,
 );
