@@ -6,8 +6,9 @@ import config from '../../config';
 export const userSchema = new Schema<TUser>(
   {
     id: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
+    password: { type: String, required: true, select: 0 },
     needsPasswordChange: { type: Boolean, required: true, default: true },
+    passwordChangedAt: { type: Date },
     role: {
       type: String,
       enum: ['admin', 'student', 'faculty'],
@@ -41,7 +42,7 @@ userSchema.post('save', function (doc) {
 
 //finding for existing user in the db so prevent duplicate creation
 userSchema.statics.isUserExists = async function (id: string) {
-  const existingUser = await UserModel.findOne({ id });
+  const existingUser = await UserModel.findOne({ id }).select('+password');
   return existingUser;
 };
 
