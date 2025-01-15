@@ -9,13 +9,13 @@ const router = Router();
 
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(USER_ROLE.admin, USER_ROLE.faculty),
   FacultyControllers.getAllFaculties,
 );
 
 router.get(
   '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(USER_ROLE.admin, USER_ROLE.faculty),
   FacultyControllers.getAFaculty,
 );
 
