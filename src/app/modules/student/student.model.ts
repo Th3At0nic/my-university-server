@@ -133,7 +133,6 @@ studentSchema.pre(/^find/, function (this: Query<any, any>) {
   this.find({ isDeleted: { $ne: true } });
 });
 
-
 // this is also same: hiding the delted data to the client if searched, but this specailly work for aggregate method if used in the service
 studentSchema.pre('aggregate', function () {
   this.pipeline().unshift({ $match: { isDeleted: { $ne: true } } });

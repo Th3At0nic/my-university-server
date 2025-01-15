@@ -55,6 +55,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
       //this block of code is responsible for providing response data with populated admissionSemester and academicDepartment document
       const populatedNewStudent = await StudentModel.findById(newStudent[0]._id)
         .populate('admissionSemester')
+        .populate('user')
         .populate({
           path: 'academicDepartment',
           populate: {
@@ -117,6 +118,7 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
 
       const populatedNewFaculty = await FacultyModel.findById(newFaculty[0]._id)
         .populate('academicFaculty')
+        .populate('user')
         .populate({
           path: 'academicDepartment',
           populate: {
@@ -179,6 +181,7 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
 
       const populatedNewAdmin = await AdminModel.findById(newAdmin[0]._id)
         .populate('managementDepartment')
+        .populate('user')
         .session(session);
 
       await session.commitTransaction();
