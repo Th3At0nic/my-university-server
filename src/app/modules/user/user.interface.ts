@@ -18,6 +18,10 @@ export interface IUser extends Model<TUser> {
     plainTextPassword: string,
     hashPassword: string,
   ): Promise<boolean>;
+  isJWTIssuedBeforePassChanged(
+    changedPassAt: Date,
+    issuedAt: number,
+  ): boolean;
 }
 
 export type TUserRole = keyof typeof USER_ROLE;

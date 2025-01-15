@@ -27,8 +27,10 @@ export const auth = (...requiredRoles: TUserRole[]) => {
     //structure , otherwise it would only show "signature invalid" message and no path
     try {
       const decoded = jwt.verify(token, config.jwt_access_secret as string);
+
       // decoded undefined
-      const { data } = decoded as JwtPayload;
+      const { data, iat } = decoded as JwtPayload;
+
       req.user = decoded as JwtPayload;
 
       if (requiredRoles && !requiredRoles.includes(data?.role)) {
@@ -74,6 +76,21 @@ export const auth = (...requiredRoles: TUserRole[]) => {
         ]);
       }
 
+      if (
+        user.passwordChangedAt &&
+        UserModel.isJWTIssuedBeforePassChanged(
+          user.passwordChangedAt,
+          iat as number,
+        )
+      ) {
+        throw new UnauthorizedError('Password Changed', [
+          {
+            path: 'authorization',
+            message:
+              'Your password has been changed recently. Please log in again with correct password to get a new token.',
+          },
+        ]);
+      }
       next();
     } catch (err) {
       //--i can avoid using try-catch block here as my instructor did it, but i did it to define the error msg

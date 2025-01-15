@@ -54,4 +54,12 @@ userSchema.statics.isPasswordCorrect = async function (
   return authPassword;
 };
 
+userSchema.statics.isJWTIssuedBeforePassChanged = function (
+  PassChangedAt: Date,
+  tokenIssuedAt: number,
+) {
+  const passChangeTime = Math.floor(new Date(PassChangedAt).getTime() / 1000);
+  return passChangeTime > tokenIssuedAt;
+};
+
 export const UserModel = model<TUser, IUser>('User', userSchema);
