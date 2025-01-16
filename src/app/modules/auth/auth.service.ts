@@ -4,8 +4,8 @@ import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { UnauthorizedError } from '../../utils/errors/UnauthorizedError';
 import { UserModel } from '../user/user.model';
 import { TChangePassData, TLoginUser, TUserAuthData } from './auth.interface';
-import jwt from 'jsonwebtoken';
 import bcrypt from 'bcrypt';
+import { generateToken } from './auth.utils';
 
 const loginUserAuth = async (payload: TLoginUser) => {
   const { id, password: userGivenPassword } = payload;
@@ -61,16 +61,21 @@ const loginUserAuth = async (payload: TLoginUser) => {
   };
 
   //create access token and send it to the client
-  const accessToken = jwt.sign(
-    {
-      data: jwtPayload,
-    },
+  const accessToken = generateToken(
+    jwtPayload,
     config.jwt_access_secret as string,
-    { expiresIn: '10d' },
+    config.jwt_access_expires_in as string,
+  );
+
+  const refreshToken = generateToken(
+    jwtPayload,
+    config.jwt_refresh_secret as string,
+    config.jwt_refresh_expires_in as string,
   );
 
   return {
     accessToken,
+    refreshToken,
     needPasswordChange: user.needsPasswordChange,
   };
 };
