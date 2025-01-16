@@ -29,11 +29,11 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       const decoded = jwt.verify(token, config.jwt_access_secret as string);
 
       // decoded undefined
-      const { data, iat } = decoded as JwtPayload;
+      const { userId, role, iat } = decoded as JwtPayload;
 
       req.user = decoded as JwtPayload;
 
-      if (requiredRoles && !requiredRoles.includes(data?.role)) {
+      if (requiredRoles && !requiredRoles.includes(role)) {
         throw new UnauthorizedError('Access Denied', [
           {
             path: 'authorization',
@@ -43,15 +43,13 @@ export const auth = (...requiredRoles: TUserRole[]) => {
         ]);
       }
 
-      const { userID, role } = data;
-
-      const user = await UserModel.isUserExists(userID);
+      const user = await UserModel.isUserExists(userId);
 
       if (!user) {
         throw new NotFoundError('User Not Found!', [
           {
             path: 'id',
-            message: `The ${role} with the provided ID: ${userID} not found in the system. Please recheck the ID and try again`,
+            message: `The ${role} with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
           },
         ]);
       }
@@ -61,7 +59,7 @@ export const auth = (...requiredRoles: TUserRole[]) => {
         throw new NotFoundError('User Not Found!', [
           {
             path: 'id',
-            message: `The ${role} with the provided ID: ${userID} not found in the system. Please recheck the ID and try again`,
+            message: `The ${role} with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
           },
         ]);
       }
@@ -71,7 +69,7 @@ export const auth = (...requiredRoles: TUserRole[]) => {
         throw new ConflictError('User is Blocked', [
           {
             path: 'status',
-            message: `The ${role} with the provided ID: ${userID} is currently blocked. Access is restricted until the block is lifted.`,
+            message: `The ${role} with the provided ID: ${userId} is currently blocked. Access is restricted until the block is lifted.`,
           },
         ]);
       }

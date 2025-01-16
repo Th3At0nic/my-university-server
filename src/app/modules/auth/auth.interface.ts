@@ -4,7 +4,7 @@ export type TLoginUser = {
 };
 
 export type TUserAuthData = {
-  userID: string;
+  userId: string;
   role: string;
 };
 

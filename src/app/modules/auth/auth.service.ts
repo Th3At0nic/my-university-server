@@ -3,9 +3,10 @@ import { ConflictError } from '../../utils/errors/ConflictError';
 import { NotFoundError } from '../../utils/errors/NotFoundError';
 import { UnauthorizedError } from '../../utils/errors/UnauthorizedError';
 import { UserModel } from '../user/user.model';
-import { TChangePassData, TLoginUser, TUserAuthData } from './auth.interface';
+import { TChangePassData, TLoginUser } from './auth.interface';
 import bcrypt from 'bcrypt';
 import { generateToken } from './auth.utils';
+import jwt, { JwtPayload } from 'jsonwebtoken';
 
 const loginUserAuth = async (payload: TLoginUser) => {
   const { id, password: userGivenPassword } = payload;
@@ -56,7 +57,7 @@ const loginUserAuth = async (payload: TLoginUser) => {
   }
 
   const jwtPayload = {
-    userID: user.id,
+    userId: user.id,
     role: user.role,
   };
 
@@ -81,16 +82,17 @@ const loginUserAuth = async (payload: TLoginUser) => {
 };
 
 const changePassword = async (
-  userData: TUserAuthData,
+  userData: JwtPayload,
   payload: TChangePassData,
 ) => {
-  const user = await UserModel.isUserExists(userData.userID);
+  // console.log(userData)
+  const user = await UserModel.isUserExists(userData.userId);
 
   if (!user) {
     throw new NotFoundError('User Not Found!', [
       {
         path: 'id',
-        message: `The User with the provided ID: ${userData.userID} not found in the system. Please recheck the ID and try again`,
+        message: `The User with the provided ID: ${userData.userId} not found in the system. Please recheck the ID and try again`,
       },
     ]);
   }
@@ -100,7 +102,7 @@ const changePassword = async (
     throw new NotFoundError('User Not Found!', [
       {
         path: 'id',
-        message: `The User with the provided ID: ${userData.userID} not found in the system. Please recheck the ID and try again`,
+        message: `The User with the provided ID: ${userData.userId} not found in the system. Please recheck the ID and try again`,
       },
     ]);
   }
@@ -110,7 +112,7 @@ const changePassword = async (
     throw new ConflictError('User is Blocked', [
       {
         path: 'status',
-        message: `The user with the provided ID: ${userData.userID} is currently blocked. Access is restricted until the block is lifted.`,
+        message: `The user with the provided ID: ${userData.userId} is currently blocked. Access is restricted until the block is lifted.`,
       },
     ]);
   }
@@ -137,7 +139,7 @@ const changePassword = async (
 
   await UserModel.findOneAndUpdate(
     {
-      id: userData.userID,
+      id: userData.userId,
       role: userData.role,
     },
     {
@@ -150,7 +152,89 @@ const changePassword = async (
   return {};
 };
 
+const createNewAccessTokenByRefreshToken = async (token: string) => {
+  if (!token) {
+    throw new UnauthorizedError('Authorization token missing!', [
+      {
+        path: 'authorization',
+        message: 'Authorization is required to access this resource.',
+      },
+    ]);
+  }
+
+  // check if the token is valid
+  // invalid token
+  const decoded = jwt.verify(token, config.jwt_refresh_secret as string);
+
+  // decoded undefined
+  const { userId, role, iat } = decoded as JwtPayload;
+
+  // req.user = decoded as JwtPayload;
+
+  const user = await UserModel.isUserExists(userId);
+
+  if (!user) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The ${role} with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserDeleted = user?.isDeleted;
+  if (isUserDeleted) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The ${role} with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserBlocked = user?.status;
+  if (isUserBlocked === 'blocked') {
+    throw new ConflictError('User is Blocked', [
+      {
+        path: 'status',
+        message: `The ${role} with the provided ID: ${userId} is currently blocked. Access is restricted until the block is lifted.`,
+      },
+    ]);
+  }
+
+  if (
+    user.passwordChangedAt &&
+    UserModel.isJWTIssuedBeforePassChanged(
+      user.passwordChangedAt,
+      iat as number,
+    )
+  ) {
+    throw new UnauthorizedError('Password Changed', [
+      {
+        path: 'authorization',
+        message:
+          'Your password has been changed recently. Please log in again with correct password to get a new token.',
+      },
+    ]);
+  }
+
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  //create access token and send it to the client
+  const accessToken = generateToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    config.jwt_access_expires_in as string,
+  );
+
+  return { accessToken };
+};
+
 export const LoginUserServices = {
   loginUserAuth,
   changePassword,
+  createNewAccessTokenByRefreshToken,
 };
