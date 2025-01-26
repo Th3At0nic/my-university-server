@@ -4,6 +4,7 @@ import { USER_ROLE } from './user.constant';
 
 export type TUser = {
   id: string;
+  email: string;
   password: string;
   needsPasswordChange: boolean;
   passwordChangedAt?: Date;
@@ -18,10 +19,7 @@ export interface IUser extends Model<TUser> {
     plainTextPassword: string,
     hashPassword: string,
   ): Promise<boolean>;
-  isJWTIssuedBeforePassChanged(
-    changedPassAt: Date,
-    issuedAt: number,
-  ): boolean;
+  isJWTIssuedBeforePassChanged(changedPassAt: Date, issuedAt: number): boolean;
 }
 
 export type TUserRole = keyof typeof USER_ROLE;

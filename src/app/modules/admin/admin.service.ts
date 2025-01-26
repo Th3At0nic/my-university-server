@@ -1,11 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { NotFoundError } from '../../errors/NotFoundError';
 import { TAdmin } from './admin.interface';
 import { AdminModel } from './admin.model';
 import { UserModel } from '../user/user.model';
-import { ConflictError } from '../../utils/errors/ConflictError';
+import { ConflictError } from '../../errors/ConflictError';
 
 const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
   const searchableFields = [

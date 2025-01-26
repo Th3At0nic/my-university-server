@@ -85,3 +85,4 @@ export const generateRoleBasedId = async (role: string) => {
   }
   return 'Something went wrong while creating an ID';
 };
+

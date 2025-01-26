@@ -40,8 +40,28 @@ const createNewAccessTokenByRefreshToken = catchAsync(
   },
 );
 
+const forgetPassword = catchAsync(async (req, res, next) => {
+  const { id } = req.body;
+  const result = await LoginUserServices.forgetPassword(id);
+  const message = 'Successfully generated reset link';
+  sendResponse(res, 200, true, message, result);
+});
+
+const resetPassword = catchAsync(async (req, res, next) => {
+  const token = req.headers.authorization;
+
+  const result = await LoginUserServices.resetPassword(
+    req.body,
+    token as string,
+  );
+  const message = 'Password Reset Successfully';
+  sendResponse(res, 200, true, message, result);
+});
+
 export const LoginUserControllers = {
   loginUser,
   changePassword,
   createNewAccessTokenByRefreshToken,
+  forgetPassword,
+  resetPassword,
 };

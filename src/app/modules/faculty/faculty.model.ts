@@ -44,6 +44,7 @@ export const facultySchema = new Schema<TFaculty>(
       required: true,
     },
     dateOfBirth: { type: Date },
+    email: { type: String, required: true, unique: true },
     contactNo: { type: String, required: true, unique: true },
     emergencyContactNo: { type: String, required: true },
     bloodGroup: {

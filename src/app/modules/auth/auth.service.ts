@@ -1,12 +1,14 @@
 import config from '../../config';
-import { ConflictError } from '../../utils/errors/ConflictError';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
-import { UnauthorizedError } from '../../utils/errors/UnauthorizedError';
+import { ConflictError } from '../../errors/ConflictError';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { UnauthorizedError } from '../../errors/UnauthorizedError';
 import { UserModel } from '../user/user.model';
-import { TChangePassData, TLoginUser } from './auth.interface';
+import { TChangePassData, TLoginUser, TResetPassData } from './auth.interface';
 import bcrypt from 'bcrypt';
 import { generateToken } from './auth.utils';
 import jwt, { JwtPayload } from 'jsonwebtoken';
+import { sendEmail } from '../../utils/sendMail';
+import { InternalServerError } from '../../errors/InternalServerError';
 
 const loginUserAuth = async (payload: TLoginUser) => {
   const { id, password: userGivenPassword } = payload;
@@ -147,6 +149,7 @@ const changePassword = async (
       needsPasswordChange: false,
       passwordChangedAt: new Date(),
     },
+    { new: true },
   );
 
   return {};
@@ -233,8 +236,144 @@ const createNewAccessTokenByRefreshToken = async (token: string) => {
   return { accessToken };
 };
 
+const forgetPassword = async (userId: string) => {
+  // console.log(userData)
+  const user = await UserModel.isUserExists(userId);
+
+  if (!user) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserDeleted = user?.isDeleted;
+  if (isUserDeleted) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserBlocked = user?.status;
+  if (isUserBlocked === 'blocked') {
+    throw new ConflictError('User is Blocked', [
+      {
+        path: 'status',
+        message: `The user with the provided ID: ${userId} is currently blocked. Access is restricted until the block is lifted.`,
+      },
+    ]);
+  }
+
+  const jwtPayload = {
+    userId: user.id,
+    role: user.role,
+  };
+
+  //create access token and send it to the client
+  const resetPasswordToken = generateToken(
+    jwtPayload,
+    config.jwt_access_secret as string,
+    '10m',
+  );
+
+  const resetPasswordUILink = `${config.reset_pass_ui_link}?id=${userId}&token=${resetPasswordToken}`;
+
+  sendEmail(user.email, resetPasswordUILink);
+
+  return null;
+};
+
+const resetPassword = async (payload: TResetPassData, token: string) => {
+  const userId = payload.id;
+
+  const user = await UserModel.isUserExists(userId);
+
+  if (!user) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserDeleted = user?.isDeleted;
+  if (isUserDeleted) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserBlocked = user?.status;
+  if (isUserBlocked === 'blocked') {
+    throw new ConflictError('User is Blocked', [
+      {
+        path: 'status',
+        message: `The user with the provided ID: ${userId} is currently blocked. Access is restricted until the block is lifted.`,
+      },
+    ]);
+  }
+
+  // check if the token is valid
+  // invalid token
+  const decoded = jwt.verify(token, config.jwt_access_secret as string);
+
+  const decodedUserId = (decoded as JwtPayload)?.userId;
+  const decodedUserRole = (decoded as JwtPayload)?.role;
+
+  if (decodedUserId !== userId) {
+    throw new UnauthorizedError('Unauthorized access', [
+      {
+        path: 'authorization',
+        message: 'User ID does not match the token payload.',
+      },
+    ]);
+  }
+
+  //hash new password
+  const newHashedPassword = await bcrypt.hash(
+    payload.newPassword,
+    Number(config.bcrypt_round_salt),
+  );
+
+  const resetResult = await UserModel.findOneAndUpdate(
+    {
+      id: decodedUserId,
+      role: decodedUserRole,
+    },
+    {
+      password: newHashedPassword,
+      needsPasswordChange: false,
+      passwordChangedAt: new Date(),
+    },
+    { new: true },
+  );
+
+  if (!resetResult) {
+    throw new InternalServerError('Password reset failed', [
+      {
+        path: 'resetPassword',
+        message: 'An error occurred while resetting the password.',
+      },
+    ]);
+  }
+
+  return null;
+};
+
 export const LoginUserServices = {
   loginUserAuth,
   changePassword,
   createNewAccessTokenByRefreshToken,
+  forgetPassword,
+  resetPassword,
 };
+

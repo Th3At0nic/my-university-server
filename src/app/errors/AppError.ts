@@ -1,4 +1,4 @@
-import { TErrorSource } from "../../interface/error";
+import { TErrorSource } from "../interface/error";
 
 
 export class AppError extends Error {

@@ -1,8 +1,8 @@
 import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
-import { ConflictError } from '../../utils/errors/ConflictError';
-import { InternalServerError } from '../../utils/errors/InternalServerError';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { ConflictError } from '../../errors/ConflictError';
+import { InternalServerError } from '../../errors/InternalServerError';
+import { NotFoundError } from '../../errors/NotFoundError';
 import { SemesterModel } from '../academicSemester/academicSemester.model';
 import { OfferedCourseModel } from '../offeredCourse/offeredCourse.model';
 import { registrationStatus } from './semesterRegistration.constant';

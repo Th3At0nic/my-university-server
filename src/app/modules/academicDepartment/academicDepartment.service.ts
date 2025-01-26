@@ -1,5 +1,5 @@
 import { QueryBuilder } from '../../builder/QueryBuilder';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { NotFoundError } from '../../errors/NotFoundError';
 import { TAcademicDepartment } from './academicDepartment.interface';
 import { DepartmentModel } from './academicDepartment.model';
 

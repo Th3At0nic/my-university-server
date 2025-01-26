@@ -47,6 +47,7 @@ export const FacultyValidationSchema = z.object({
         .optional()
         .or(z.date())
         .optional(),
+      email: z.string().email(),
       contactNo: z.string({
         required_error: 'Contact number is required',
       }),

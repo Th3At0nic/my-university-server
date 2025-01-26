@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ValidationError } from '../../utils/errors/ValidationError';
+import { ValidationError } from '../../errors/ValidationError';
 
 export const OfferedCourseValidationSchema = z.object({
   body: z
