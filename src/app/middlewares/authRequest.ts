@@ -1,12 +1,12 @@
 import { NextFunction, Request, Response } from 'express';
 import catchAsync from '../utils/catchAsync';
-import { UnauthorizedError } from '../utils/errors/UnauthorizedError';
+import { UnauthorizedError } from '../errors/UnauthorizedError';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 import config from '../config';
 import { TUserRole } from '../modules/user/user.interface';
 import { UserModel } from '../modules/user/user.model';
-import { NotFoundError } from '../utils/errors/NotFoundError';
-import { ConflictError } from '../utils/errors/ConflictError';
+import { NotFoundError } from '../errors/NotFoundError';
+import { ConflictError } from '../errors/ConflictError';
 
 export const auth = (...requiredRoles: TUserRole[]) => {
   return catchAsync(async (req: Request, res: Response, next: NextFunction) => {

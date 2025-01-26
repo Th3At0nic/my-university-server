@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { NotFoundError } from '../../errors/NotFoundError';
 import { TFaculty } from './faculty.interface';
 import { FacultyModel } from './faculty.model';
 import { UserModel } from '../user/user.model';
-import { ConflictError } from '../../utils/errors/ConflictError';
+import { ConflictError } from '../../errors/ConflictError';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 
 const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {

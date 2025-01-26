@@ -1,4 +1,4 @@
-import { TErrorSource } from '../../interface/error';
+import { TErrorSource } from '../interface/error';
 import { AppError } from './AppError';
 
 export class InternalServerError extends AppError {

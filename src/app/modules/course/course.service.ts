@@ -1,7 +1,7 @@
 import mongoose from 'mongoose';
 import { QueryBuilder } from '../../builder/QueryBuilder';
-import { ConflictError } from '../../utils/errors/ConflictError';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
+import { ConflictError } from '../../errors/ConflictError';
+import { NotFoundError } from '../../errors/NotFoundError';
 import { TCourse, TCourseFaculty } from './course.interface';
 import { CourseFacultyModel, CourseModel } from './course.model';
 

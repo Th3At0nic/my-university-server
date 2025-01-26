@@ -1,8 +1,8 @@
 import { OfferedCourseModel } from './offeredCourse.model';
 import { TOfferedCourse } from './offeredCourse.interface';
-import { InternalServerError } from '../../utils/errors/InternalServerError';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
-import { ConflictError } from '../../utils/errors/ConflictError';
+import { InternalServerError } from '../../errors/InternalServerError';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { ConflictError } from '../../errors/ConflictError';
 import { DepartmentModel } from '../academicDepartment/academicDepartment.model';
 import { SemesterRegistrationModel } from '../semesterRegistration/semesterRegistration.model';
 import { CourseModel } from '../course/course.model';

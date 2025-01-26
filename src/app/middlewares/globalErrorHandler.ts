@@ -5,10 +5,10 @@ import { ErrorRequestHandler } from 'express';
 import { ZodError } from 'zod';
 import { TErrorSource } from '../interface/error';
 import config from '../config';
-import { handleZodError } from '../utils/errors/handleZodError';
-import { handleMongooseError } from '../utils/errors/handleMongooseError';
-import { handleCastError } from '../utils/errors/handleCastError';
-import { handleDuplicateError } from '../utils/errors/handleDuplicateError';
+import { handleZodError } from '../errors/handleZodError';
+import { handleMongooseError } from '../errors/handleMongooseError';
+import { handleCastError } from '../errors/handleCastError';
+import { handleDuplicateError } from '../errors/handleDuplicateError';
 
 export const globalErrorHandler: ErrorRequestHandler = (
   err,

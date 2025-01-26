@@ -1,6 +1,6 @@
 import { QueryBuilder } from '../../builder/QueryBuilder';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
-import { ValidationError } from '../../utils/errors/ValidationError';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { ValidationError } from '../../errors/ValidationError';
 import { semesterCodeNameMapper } from './academicSemester.constants';
 import { TAcademicSemester } from './academicSemester.interface';
 import { SemesterModel } from './academicSemester.model';

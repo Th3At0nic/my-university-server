@@ -6,7 +6,7 @@ import { StudentModel } from '../student/student.model';
 import { TUser } from './user.interface';
 import { UserModel } from './user.model';
 import { generateNewStudentId, generateRoleBasedId } from './user.utils';
-import { ConflictError } from '../../utils/errors/ConflictError';
+import { ConflictError } from '../../errors/ConflictError';
 import { FacultyModel } from '../faculty/faculty.model';
 import { TFaculty } from '../faculty/faculty.interface';
 import { TAdmin } from '../admin/admin.interface';
@@ -23,6 +23,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
       password: password || (config.default_password as string),
       role: 'student',
       id: await generateNewStudentId(studentData),
+      email: studentData.email,
     };
 
     //preventing duplicate creation of student
@@ -101,7 +102,7 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
       password: password || (config.default_password as string),
       role: 'faculty',
       id: await generateRoleBasedId('faculty'),
-      //first parameter should be data and second should be determine role to create different id
+      email: facultyData.email,
     };
 
     const newUser = await UserModel.create([user], { session });
@@ -164,7 +165,7 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
       password: password || (config.default_password as string),
       role: 'admin',
       id: await generateRoleBasedId('admin'),
-      //first parameter should be data and second should be determine role to create different id
+      email: adminData.email,
     };
 
     const newUser = await UserModel.create([user], { session });

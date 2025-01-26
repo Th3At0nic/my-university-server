@@ -2,8 +2,8 @@ import mongoose from 'mongoose';
 import { StudentModel } from './student.model';
 import { UserModel } from '../user/user.model';
 import { TStudent } from './student.interface';
-import { NotFoundError } from '../../utils/errors/NotFoundError';
-import { ConflictError } from '../../utils/errors/ConflictError';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { ConflictError } from '../../errors/ConflictError';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { studentSearchableFields } from './student.constants';
 

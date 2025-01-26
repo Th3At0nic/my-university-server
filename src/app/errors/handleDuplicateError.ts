@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { TErrorSource, TGenericErrorResponse } from './../../interface/error';
+import { TErrorSource, TGenericErrorResponse } from '../interface/error';
 
 export const handleDuplicateError = (err: any): TGenericErrorResponse => {
   const statusCode = 409;
