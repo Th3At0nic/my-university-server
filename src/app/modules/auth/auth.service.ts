@@ -376,4 +376,3 @@ export const LoginUserServices = {
   forgetPassword,
   resetPassword,
 };
-

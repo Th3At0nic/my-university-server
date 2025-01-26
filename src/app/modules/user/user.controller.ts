@@ -35,8 +35,16 @@ const createAdmin = catchAsync(async (req, res, next) => {
   sendResponse(res, 200, true, message, result);
 });
 
+const getMyData = catchAsync(async (req, res, next) => {
+  const token = req.headers.authorization;
+  const result = await userServices.getMyDataFromDB(token as string);
+  const message = 'Successfully Retrieved the data';
+  sendResponse(res, 200, true, message, result);
+});
+
 export const userControllers = {
   createStudent,
   createFaculty,
   createAdmin,
+  getMyData,
 };
