@@ -1,3 +1,4 @@
+import jwt, { JwtPayload } from 'jsonwebtoken';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import config from '../../config';
@@ -11,6 +12,8 @@ import { FacultyModel } from '../faculty/faculty.model';
 import { TFaculty } from '../faculty/faculty.interface';
 import { TAdmin } from '../admin/admin.interface';
 import { AdminModel } from '../admin/admin.model';
+import { UnauthorizedError } from '../../errors/UnauthorizedError';
+import { USER_ROLE } from './user.constant';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
@@ -210,8 +213,42 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
   return 'Something went wrong while creating a new User using UserModel!';
 };
 
+const getMyDataFromDB = async (token: string) => {
+  if (!token) {
+    throw new UnauthorizedError('Failed to retrieve the data', [
+      {
+        path: 'unauthorized token',
+        message: 'You are not authorized',
+      },
+    ]);
+  }
+
+  const decoded = jwt.verify(token, config.jwt_access_secret as string);
+
+  const { userId, role } = decoded as JwtPayload;
+
+  let result = null;
+
+  if (role === USER_ROLE.admin) {
+    result = await AdminModel.findOne({
+      id: userId,
+    });
+  } else if (role === USER_ROLE.faculty) {
+    result = await FacultyModel.findOne({
+      id: userId,
+    });
+  } else if (role === USER_ROLE.student) {
+    result = await StudentModel.findOne({
+      id: userId,
+    });
+  }
+
+  return result;
+};
+
 export const userServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
+  getMyDataFromDB,
 };
