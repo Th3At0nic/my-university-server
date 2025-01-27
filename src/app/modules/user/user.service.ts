@@ -1,10 +1,9 @@
-import jwt, { JwtPayload } from 'jsonwebtoken';
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import mongoose from 'mongoose';
 import config from '../../config';
 import { TStudent } from '../student/student.interface';
 import { StudentModel } from '../student/student.model';
-import { TUser } from './user.interface';
+import { TChangeStatusData, TUser } from './user.interface';
 import { UserModel } from './user.model';
 import { generateNewStudentId, generateRoleBasedId } from './user.utils';
 import { ConflictError } from '../../errors/ConflictError';
@@ -12,8 +11,9 @@ import { FacultyModel } from '../faculty/faculty.model';
 import { TFaculty } from '../faculty/faculty.interface';
 import { TAdmin } from '../admin/admin.interface';
 import { AdminModel } from '../admin/admin.model';
-import { UnauthorizedError } from '../../errors/UnauthorizedError';
 import { USER_ROLE } from './user.constant';
+import { NotFoundError } from '../../errors/NotFoundError';
+import { InternalServerError } from '../../errors/InternalServerError';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
@@ -213,20 +213,7 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
   return 'Something went wrong while creating a new User using UserModel!';
 };
 
-const getMyDataFromDB = async (token: string) => {
-  if (!token) {
-    throw new UnauthorizedError('Failed to retrieve the data', [
-      {
-        path: 'unauthorized token',
-        message: 'You are not authorized',
-      },
-    ]);
-  }
-
-  const decoded = jwt.verify(token, config.jwt_access_secret as string);
-
-  const { userId, role } = decoded as JwtPayload;
-
+const getMyDataFromDB = async (userId: string, role: string) => {
   let result = null;
 
   if (role === USER_ROLE.admin) {
@@ -246,9 +233,50 @@ const getMyDataFromDB = async (token: string) => {
   return result;
 };
 
+const changeUserStatusIntoDB = async (
+  userId: string,
+  payload: TChangeStatusData,
+) => {
+  const user = await UserModel.findById(userId);
+
+  if (!user) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const isUserDeleted = user?.isDeleted;
+  if (isUserDeleted) {
+    throw new NotFoundError('User Not Found!', [
+      {
+        path: 'id',
+        message: `The User with the provided ID: ${userId} not found in the system. Please recheck the ID and try again`,
+      },
+    ]);
+  }
+
+  const result = await UserModel.findByIdAndUpdate(userId, payload, {
+    new: true,
+    runValidators: true,
+  });
+  if (!result) {
+    throw new InternalServerError(`Internal Server Error`, [
+      {
+        path: 'status',
+        message: `Something went wrong. Couldn't change the user status`,
+      },
+    ]);
+  }
+  return result;
+};
+
 export const userServices = {
   createStudentIntoDB,
   createFacultyIntoDB,
   createAdminIntoDB,
   getMyDataFromDB,
+  changeUserStatusIntoDB,
 };
