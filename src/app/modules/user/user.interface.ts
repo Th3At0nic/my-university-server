@@ -23,3 +23,7 @@ export interface IUser extends Model<TUser> {
 }
 
 export type TUserRole = keyof typeof USER_ROLE;
+
+export type TChangeStatusData = {
+  status: string;
+};

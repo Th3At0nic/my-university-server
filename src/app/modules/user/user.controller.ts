@@ -3,6 +3,8 @@
 import { userServices } from './user.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
+import { UnauthorizedError } from '../../errors/UnauthorizedError';
+import { JwtPayload } from 'jsonwebtoken';
 // import studentValidationSchema from '../student/student.validation';
 
 //imported HOF(catchAsync()) to pass the async func there to handle the promise and error, reduced boilerplates
@@ -36,9 +38,17 @@ const createAdmin = catchAsync(async (req, res, next) => {
 });
 
 const getMyData = catchAsync(async (req, res, next) => {
-  const token = req.headers.authorization;
-  const result = await userServices.getMyDataFromDB(token as string);
+  const { userId, role } = req.user as JwtPayload;
+
+  const result = await userServices.getMyDataFromDB(userId, role);
   const message = 'Successfully Retrieved the data';
+  sendResponse(res, 200, true, message, result);
+});
+
+const changeUserStatus = catchAsync(async (req, res, next) => {
+  const { id } = req.params;
+  const result = await userServices.changeUserStatusIntoDB(id, req.body);
+  const message = `User is ${req.body.status}`;
   sendResponse(res, 200, true, message, result);
 });
 
@@ -47,4 +57,5 @@ export const userControllers = {
   createFaculty,
   createAdmin,
   getMyData,
+  changeUserStatus,
 };
