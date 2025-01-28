@@ -14,6 +14,7 @@ import { AdminModel } from '../admin/admin.model';
 import { USER_ROLE } from './user.constant';
 import { NotFoundError } from '../../errors/NotFoundError';
 import { InternalServerError } from '../../errors/InternalServerError';
+import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
 const createStudentIntoDB = async (password: string, studentData: TStudent) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
@@ -50,6 +51,8 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
       studentData.user = newUser[0]._id;
 
       studentData.isDeleted = newUser[0].isDeleted;
+
+      sendImageToCloudinary();
 
       //creating a new student
       const newStudent = await StudentModel.create([studentData], {

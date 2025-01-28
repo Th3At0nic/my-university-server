@@ -12,11 +12,14 @@ import { JwtPayload } from 'jsonwebtoken';
 const createStudent = catchAsync(async (req, res, next) => {
   const { password, student: studentData } = req.body;
 
-  const result = await userServices.createStudentIntoDB(password, studentData);
+  console.log('ekhane req file: ', req.file);
+  console.log('ekhane json data: ', req.body);
+
+  // const result = await userServices.createStudentIntoDB(password, studentData);
 
   const message = 'Successfully created the student!';
 
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, null);
 });
 
 const createFaculty = catchAsync(async (req, res, next) => {

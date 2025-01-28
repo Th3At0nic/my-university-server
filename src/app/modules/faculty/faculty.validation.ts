@@ -30,7 +30,8 @@ export const FacultyValidationSchema = z.object({
     password: z
       .string()
       .trim()
-      .max(35, { message: "Password can't have more than 35 characters" }),
+      .max(35, { message: "Password can't have more than 35 characters" })
+      .optional(),
     faculty: z.object({
       designation: z.string({
         required_error: 'Designation is required',
@@ -63,9 +64,9 @@ export const FacultyValidationSchema = z.object({
       permanentAddress: z.string({
         required_error: 'Permanent address is required',
       }),
-      profileImage: z.string({
-        required_error: 'Profile image is required',
-      }),
+      // profileImage: z.string({
+      //   required_error: 'Profile image is required',
+      // }),
       academicFaculty: z.string({
         required_error: 'Academic faculty ObjectId is required',
       }),
@@ -136,7 +137,7 @@ export const updateFacultyValidationSchema = z.object({
         .optional(), // Optional for update
       presentAddress: z.string().optional(), // Optional for update
       permanentAddress: z.string().optional(), // Optional for update
-      profileImage: z.string().optional(), // Optional for update
+      // profileImage: z.string().optional(), // Optional for update
       academicFaculty: z.string().optional(), // Optional for update
       academicDepartment: z.string().optional(), // Optional for update
     }),
