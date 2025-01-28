@@ -29,7 +29,8 @@ export const AdminValidationSchema = z.object({
     password: z
       .string()
       .trim()
-      .max(35, { message: "Password can't have more than 35 characters" }),
+      .max(35, { message: "Password can't have more than 35 characters" })
+      .optional(),
     admin: z.object({
       designation: z.string().min(1, { message: 'Designation is required' }),
       name: NameValidationSchema,
@@ -51,7 +52,7 @@ export const AdminValidationSchema = z.object({
       permanentAddress: z
         .string()
         .min(1, { message: 'Permanent address is required' }),
-      profileImage: z.string().min(1, { message: 'Profile image is required' }),
+      // profileImage: z.string().min(1, { message: 'Profile image is required' }),
       managementDepartment: z
         .string()
         .min(1, { message: 'Management department is required' }),
@@ -108,7 +109,7 @@ export const updateAdminValidationSchema = z.object({
         .optional(), // Optional for update
       presentAddress: z.string().optional(),
       permanentAddress: z.string().optional(),
-      profileImage: z.string().optional(),
+      // profileImage: z.string().optional(),
       managementDepartment: z.string().optional(),
     })
     .optional(),

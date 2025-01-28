@@ -59,7 +59,8 @@ export const studentValidationSchema = z.object({
     password: z
       .string()
       .trim()
-      .max(35, { message: "Password can't have more than 35 characters" }),
+      .max(35, { message: "Password can't have more than 35 characters" })
+      .optional(),
     student: z.object({
       name: userNameValidationSchema,
       gender: z.enum(['male', 'female', 'others'], {
@@ -105,7 +106,7 @@ export const studentValidationSchema = z.object({
           },
           { message: 'Semester ID does not exist in the database' }, // Error message for non-existent ID
         ),
-      profileImg: z.string().optional(),
+      // profileImg: z.string().optional(),
     }),
   }),
 });
@@ -224,7 +225,7 @@ export const updateStudentValidationSchema = z.object({
           { message: 'Semester ID does not exist in the database' }, // Error message for non-existent ID
         )
         .optional(),
-      profileImg: z.string().optional(),
+      // profileImg: z.string().optional(),
     }),
   }),
 });
