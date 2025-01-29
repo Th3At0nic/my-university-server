@@ -1,25 +1,22 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { userServices } from './user.service';
 import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
-import { UnauthorizedError } from '../../errors/UnauthorizedError';
 import { JwtPayload } from 'jsonwebtoken';
+import { userServices } from './user.service';
 // import studentValidationSchema from '../student/student.validation';
 
 //imported HOF(catchAsync()) to pass the async func there to handle the promise and error, reduced boilerplates
 
 const createStudent = catchAsync(async (req, res, next) => {
   const { password, student: studentData } = req.body;
-
-  console.log('ekhane req file: ', req.file);
-  console.log('ekhane json data: ', req.body);
-
-  // const result = await userServices.createStudentIntoDB(password, studentData);
-
+  const result = await userServices.createStudentIntoDB(
+    req.file,
+    password,
+    studentData,
+  );
   const message = 'Successfully created the student!';
-
-  sendResponse(res, 200, true, message, null);
+  sendResponse(res, 200, true, message, result);
 });
 
 const createFaculty = catchAsync(async (req, res, next) => {

@@ -16,7 +16,11 @@ import { NotFoundError } from '../../errors/NotFoundError';
 import { InternalServerError } from '../../errors/InternalServerError';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
 
-const createStudentIntoDB = async (password: string, studentData: TStudent) => {
+const createStudentIntoDB = async (
+  file: any,
+  password: string,
+  studentData: TStudent,
+) => {
   // creating a mongodb transaction session to create user and student both together, or abort if any one crushes
   const session = await mongoose.startSession();
 
@@ -40,6 +44,7 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
         },
       ]);
     }
+
     //creating a new user
     const newUser = await UserModel.create([user], { session });
 
@@ -52,7 +57,12 @@ const createStudentIntoDB = async (password: string, studentData: TStudent) => {
 
       studentData.isDeleted = newUser[0].isDeleted;
 
-      sendImageToCloudinary();
+      //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
+      const imgName = `${user.id}${studentData.name.firstName}`;
+      const imgPath = file.path;
+      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+
+      studentData.profileImg = uploadImgResult?.secure_url as string;
 
       //creating a new student
       const newStudent = await StudentModel.create([studentData], {
