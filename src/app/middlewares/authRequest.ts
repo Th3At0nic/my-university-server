@@ -31,8 +31,6 @@ export const auth = (...requiredRoles: TUserRole[]) => {
       // decoded undefined
       const { userId, role, iat } = decoded as JwtPayload;
 
-      req.user = decoded as JwtPayload;
-
       if (requiredRoles && !requiredRoles.includes(role)) {
         throw new UnauthorizedError('Access Denied', [
           {
@@ -89,6 +87,8 @@ export const auth = (...requiredRoles: TUserRole[]) => {
           },
         ]);
       }
+
+      req.user = decoded as JwtPayload;
       next();
     } catch (err) {
       //--i can avoid using try-catch block here as my instructor did it, but i did it to define the error msg
