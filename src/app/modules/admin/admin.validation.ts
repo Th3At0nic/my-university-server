@@ -109,7 +109,6 @@ export const updateAdminValidationSchema = z.object({
         .optional(), // Optional for update
       presentAddress: z.string().optional(),
       permanentAddress: z.string().optional(),
-      // profileImage: z.string().optional(),
       managementDepartment: z.string().optional(),
     })
     .optional(),

@@ -106,7 +106,6 @@ export const studentValidationSchema = z.object({
           },
           { message: 'Semester ID does not exist in the database' }, // Error message for non-existent ID
         ),
-      // profileImg: z.string().optional(),
     }),
   }),
 });
