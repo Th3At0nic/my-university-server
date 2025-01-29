@@ -109,7 +109,11 @@ const createStudentIntoDB = async (
 //
 //
 //creating faculty in the db as well as user together
-const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
+const createFacultyIntoDB = async (
+  file: any,
+  password: string,
+  facultyData: TFaculty,
+) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -130,6 +134,13 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
       facultyData.user = newUser[0]._id;
 
       facultyData.isDeleted = newUser[0].isDeleted;
+
+      //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
+      const imgName = `${user.id}${facultyData.name.firstName}`;
+      const imgPath = file.path;
+      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+
+      facultyData.profileImage = uploadImgResult?.secure_url as string;
 
       const newFaculty = await FacultyModel.create([facultyData], { session });
 
@@ -172,7 +183,11 @@ const createFacultyIntoDB = async (password: string, facultyData: TFaculty) => {
 //
 //
 //creating faculty in the db as well as user together
-const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
+const createAdminIntoDB = async (
+  file: any,
+  password: string,
+  adminData: TAdmin,
+) => {
   const session = await mongoose.startSession();
   try {
     session.startTransaction();
@@ -193,6 +208,13 @@ const createAdminIntoDB = async (password: string, adminData: TAdmin) => {
       adminData.user = newUser[0]._id;
 
       adminData.isDeleted = newUser[0].isDeleted;
+
+      //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
+      const imgName = `${user.id}${adminData.name.firstName}`;
+      const imgPath = file.path;
+      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+
+      adminData.profileImage = uploadImgResult?.secure_url as string;
 
       const newAdmin = await AdminModel.create([adminData], { session });
 
