@@ -1,3 +1,4 @@
+import { SemesterRegistrationModel } from './../semesterRegistration/semesterRegistration.model';
 import { ConflictError } from '../../errors/ConflictError';
 import { InternalServerError } from '../../errors/InternalServerError';
 import { NotFoundError } from '../../errors/NotFoundError';
@@ -6,6 +7,7 @@ import { StudentModel } from '../student/student.model';
 import { TEnrolledCourse } from './enrolledCourse.interface';
 import { EnrolledCourseModel } from './enrolledCourse.model';
 import { startSession } from 'mongoose';
+import { CourseModel } from '../course/course.model';
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -18,7 +20,7 @@ const createEnrolledCourseIntoDB = async (
     const { offeredCourse } = payload;
 
     const isOfferedCourseExists =
-      await OfferedCourseModel.findById(offeredCourse).session(session);
+      await OfferedCourseModel.findById(offeredCourse);
     if (!isOfferedCourseExists) {
       throw new NotFoundError('Offered Course Not Found', [
         {
@@ -29,6 +31,7 @@ const createEnrolledCourseIntoDB = async (
       ]);
     }
 
+    //checking if the max capacity of the offeredCourse exceeds or available
     if (isOfferedCourseExists.maxCapacity <= 0) {
       throw new NotFoundError('Classroom is full', [
         {
@@ -38,9 +41,9 @@ const createEnrolledCourseIntoDB = async (
       ]);
     }
 
-    const student = await StudentModel.findOne({ id: userId })
-      .select('_id')
-      .session(session);
+    //retrieve the student with the custom id to check availability and get the student mongodb id
+    const student = await StudentModel.findOne({ id: userId }).select('_id');
+
     if (!student) {
       throw new NotFoundError('Student Not Found', [
         {
@@ -50,9 +53,10 @@ const createEnrolledCourseIntoDB = async (
       ]);
     }
 
+    //checking if the student with same registeredSem and same course enrolled before or not
     const isTheStudentEnrolled = await EnrolledCourseModel.findOne({
       semesterRegistration: isOfferedCourseExists.semesterRegistration,
-      offeredCourse,
+      offeredCourse: isOfferedCourseExists._id,
       student: student._id,
     }).session(session);
 
@@ -65,6 +69,64 @@ const createEnrolledCourseIntoDB = async (
       ]);
     }
 
+    // 1️⃣ Fetch the registered semester's max credits
+    const registeredSemester = await SemesterRegistrationModel.findById(
+      isOfferedCourseExists.semesterRegistration,
+    )
+      .session(session)
+      .select('maxCredit');
+    if (!registeredSemester) {
+      throw new NotFoundError('Semester Registration Not Found', [
+        {
+          path: 'semesterRegistrationId',
+          message: 'Invalid semester registration ID.',
+        },
+      ]);
+    }
+    const maxCredit = registeredSemester.maxCredit;
+
+    // 2️⃣ Get the course's credit of which is going to be enrolled by the given offeredCourse
+    const newCourse = await CourseModel.findById(isOfferedCourseExists.course)
+      .session(session)
+      .select('credits');
+    if (!newCourse) {
+      throw new NotFoundError('Course Not Found', [
+        { path: 'courseId', message: 'Invalid course ID.' },
+      ]);
+    }
+    const newCourseCredits = newCourse.credits;
+
+    // 3️⃣ Get all enrolled courses for this student in the same semester
+    const enrolledCourses = await EnrolledCourseModel.find({
+      student: student._id,
+      semesterRegistration: isOfferedCourseExists.semesterRegistration,
+    })
+      .session(session)
+      .select('course');
+
+    // 4️⃣ Fetch total enrolled credits
+    const enrolledCourseIds = enrolledCourses.map((ec) => ec.course);
+    const enrolledCredits = await CourseModel.aggregate([
+      { $match: { _id: { $in: enrolledCourseIds } } },
+      { $group: { _id: null, totalCredits: { $sum: '$credits' } } },
+    ]).session(session);
+
+    const totalEnrolledCredits =
+      enrolledCredits.length > 0 ? enrolledCredits[0].totalCredits : 0;
+
+    const totalAfterEnrollment = totalEnrolledCredits + newCourseCredits;
+
+    // 5️⃣ Compare with max credits allowed
+    if (totalAfterEnrollment > maxCredit) {
+      throw new ConflictError('Credit Limit Exceeded', [
+        {
+          path: 'credits',
+          message: `Total credits (${totalAfterEnrollment}) exceed the allowed limit (${maxCredit}).`,
+        },
+      ]);
+    }
+
+    //finally after passing all these validations, we let the student to be enrolled, creating EnrolledCourse
     const result = await EnrolledCourseModel.create(
       [
         {
