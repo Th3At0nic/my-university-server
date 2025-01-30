@@ -1,6 +1,9 @@
 import { Router } from 'express';
 import { validateRequest } from '../../middlewares/validateRequest';
-import { CreateEnrolledCourseValidationSchema } from './enrolledCourse.validation';
+import {
+  CreateEnrolledCourseValidationSchema,
+  UpdateCourseMarksValidationSchema,
+} from './enrolledCourse.validation';
 import { EnrolledCourseControllers } from './enrolledCourse.controller';
 import { auth } from '../../middlewares/authRequest';
 import { USER_ROLE } from '../user/user.constant';
@@ -12,6 +15,13 @@ router.post(
   auth(USER_ROLE.student),
   validateRequest(CreateEnrolledCourseValidationSchema),
   EnrolledCourseControllers.createEnrolledCourse,
+);
+
+router.patch(
+  '/update-enrolled-course-marks',
+  auth(USER_ROLE.faculty),
+  validateRequest(UpdateCourseMarksValidationSchema),
+  EnrolledCourseControllers.updateEnrolledCourseMarks,
 );
 
 export const EnrolledCourseRoutes = router;
