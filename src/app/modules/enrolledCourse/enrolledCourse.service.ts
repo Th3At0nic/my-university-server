@@ -96,7 +96,7 @@ const createEnrolledCourseIntoDB = async (
     }
     const newCourseCredits = newCourse.credits;
 
-    // 3️⃣ Get all enrolled courses for this student in the same semester
+    // 3️⃣ Get all enrolled courses for a student in the same registered semester
     const enrolledCourses = await EnrolledCourseModel.find({
       student: student._id,
       semesterRegistration: isOfferedCourseExists.semesterRegistration,
