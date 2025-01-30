@@ -8,6 +8,8 @@ import { TEnrolledCourse } from './enrolledCourse.interface';
 import { EnrolledCourseModel } from './enrolledCourse.model';
 import { startSession } from 'mongoose';
 import { CourseModel } from '../course/course.model';
+import { FacultyModel } from '../faculty/faculty.model';
+import { UnauthorizedError } from '../../errors/UnauthorizedError';
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -72,9 +74,8 @@ const createEnrolledCourseIntoDB = async (
     // 1️⃣ Fetch the registered semester's max credits
     const registeredSemester = await SemesterRegistrationModel.findById(
       isOfferedCourseExists.semesterRegistration,
-    )
-      .session(session)
-      .select('maxCredit');
+    ).session(session);
+
     if (!registeredSemester) {
       throw new NotFoundError('Semester Registration Not Found', [
         {
@@ -83,6 +84,16 @@ const createEnrolledCourseIntoDB = async (
         },
       ]);
     }
+
+    if (registeredSemester.status !== 'UPCOMING') {
+      throw new ConflictError('Enrollment not allowed', [
+        {
+          path: 'semesterRegistration',
+          message: `You cannot enroll in a semester that has already ${registeredSemester.status}.`,
+        },
+      ]);
+    }
+
     const maxCredit = registeredSemester.maxCredit;
 
     // 2️⃣ Get the course's credit of which is going to be enrolled by the given offeredCourse
@@ -175,6 +186,120 @@ const createEnrolledCourseIntoDB = async (
   }
 };
 
+const updateCourseMarksIntoDB = async (
+  facultyId: string,
+  payload: Partial<TEnrolledCourse>,
+) => {
+  const { semesterRegistration, offeredCourse, student, courseMarks } = payload;
+
+  const isSemesterRegistrationExists =
+    await SemesterRegistrationModel.findById(semesterRegistration);
+
+  if (!isSemesterRegistrationExists) {
+    throw new NotFoundError('Semester Registration Not Found', [
+      {
+        path: 'semesterRegistration',
+        message: 'Semester Registration not found in the system.',
+      },
+    ]);
+  }
+
+  if (isSemesterRegistrationExists.status === 'UPCOMING') {
+    throw new ConflictError(
+      'Marks cannot be updated for an upcoming semester',
+      [
+        {
+          path: 'semesterRegistration',
+          message: 'Marks cannot be updated for an upcoming semester.',
+        },
+      ],
+    );
+  }
+
+  const isOfferedCourseExists =
+    await OfferedCourseModel.findById(offeredCourse);
+  if (!isOfferedCourseExists) {
+    throw new NotFoundError('Offered Course Not Found', [
+      {
+        path: 'offeredCourse',
+        message: 'Offered Course not found in the system.',
+      },
+    ]);
+  }
+
+  const isStudentExists = await StudentModel.findById(student);
+  if (!isStudentExists) {
+    throw new NotFoundError('Student Not Found', [
+      {
+        path: 'student',
+        message: 'Student not found in the system.',
+      },
+    ]);
+  }
+
+  const isUserFacultyExists = await FacultyModel.findOne({ id: facultyId });
+  if (!isUserFacultyExists) {
+    throw new NotFoundError('Faculty Not Found', [
+      {
+        path: 'faculty',
+        message: 'Faculty not found in the system.',
+      },
+    ]);
+  }
+
+  const facultyInEnrolledCourse = await EnrolledCourseModel.findOne({
+    semesterRegistration: semesterRegistration,
+    faculty: isOfferedCourseExists.faculty,
+    student: student,
+    offeredCourse: offeredCourse,
+  });
+  if (!facultyInEnrolledCourse) {
+    throw new NotFoundError('Faculty does not matched', [
+      {
+        path: 'faculty',
+        message: 'Faculty not matched in the enrolled course.',
+      },
+    ]);
+  }
+
+  if (!isUserFacultyExists._id.equals(facultyInEnrolledCourse.faculty)) {
+    throw new UnauthorizedError('Unauthorized Faculty Access', [
+      {
+        path: 'authorization',
+        message:
+          'You are not authorized to modify this enrolled course. Only the assigned faculty can access or update this data.',
+      },
+    ]);
+  }
+
+  const modifiedData: Record<string, unknown> = { ...courseMarks };
+
+  if (courseMarks && Object.keys(courseMarks).length) {
+    for (const [key, value] of Object.entries(courseMarks)) {
+      modifiedData[`courseMarks.${key}`] = value;
+    }
+  }
+
+  // ❗ Update course marks properly in the database
+  const updatedEnrolledCourse = await EnrolledCourseModel.findByIdAndUpdate(
+    facultyInEnrolledCourse._id,
+    modifiedData,
+    { new: true },
+  );
+
+  if (!updatedEnrolledCourse) {
+    throw new InternalServerError('Failed to update course marks', [
+      {
+        path: 'database',
+        message: 'An unexpected error occurred while updating marks.',
+      },
+    ]);
+  }
+
+  return updatedEnrolledCourse;
+};
+
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
+  updateCourseMarksIntoDB,
 };
