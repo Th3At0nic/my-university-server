@@ -317,7 +317,23 @@ const updateCourseMarksIntoDB = async (
   return updatedEnrolledCourse;
 };
 
+const getAllEnrolledCourseFromDB = async () => {
+  const result = await EnrolledCourseModel.find();
+  if (!result.length) {
+    throw new InternalServerError('Failed to retrieved enrolled courses', [
+      {
+        path: 'database',
+        message:
+          'An unexpected error occurred while retrieving enrolled courses.',
+      },
+    ]);
+  }
+
+  return result;
+};
+
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
   updateCourseMarksIntoDB,
+  getAllEnrolledCourseFromDB,
 };
