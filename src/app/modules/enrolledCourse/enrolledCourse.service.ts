@@ -10,6 +10,7 @@ import { startSession } from 'mongoose';
 import { CourseModel } from '../course/course.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { UnauthorizedError } from '../../errors/UnauthorizedError';
+import { calculateGradeAndPoints } from './enrolledCourse.utils';
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -273,6 +274,23 @@ const updateCourseMarksIntoDB = async (
   }
 
   const modifiedData: Record<string, unknown> = { ...courseMarks };
+
+  if (courseMarks?.finalTerm) {
+    const { classTest1, midTerm, classTest2, finalTerm } =
+      facultyInEnrolledCourse.courseMarks;
+
+    const totalMarks =
+      Math.ceil(classTest1 * 0.1) +
+      Math.ceil(midTerm * 0.3) +
+      Math.ceil(classTest2 * 0.1) +
+      Math.ceil(finalTerm * 0.5);
+
+    const courseGradeAndPoints = calculateGradeAndPoints(totalMarks);
+
+    modifiedData.grade = courseGradeAndPoints.grade;
+    modifiedData.gradePoints = courseGradeAndPoints.gradePoints;
+    modifiedData.isCompleted = true;
+  }
 
   if (courseMarks && Object.keys(courseMarks).length) {
     for (const [key, value] of Object.entries(courseMarks)) {
