@@ -52,7 +52,6 @@ export const AdminValidationSchema = z.object({
       permanentAddress: z
         .string()
         .min(1, { message: 'Permanent address is required' }),
-      // profileImage: z.string().min(1, { message: 'Profile image is required' }),
       managementDepartment: z
         .string()
         .min(1, { message: 'Management department is required' }),
@@ -60,9 +59,6 @@ export const AdminValidationSchema = z.object({
   }),
 });
 
-// export type AdminValidationType = z.infer<typeof AdminValidationSchema>;
-
-//
 //
 //
 // below are for update validation

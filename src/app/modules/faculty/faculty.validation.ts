@@ -64,12 +64,6 @@ export const FacultyValidationSchema = z.object({
       permanentAddress: z.string({
         required_error: 'Permanent address is required',
       }),
-      // profileImage: z.string({
-      //   required_error: 'Profile image is required',
-      // }),
-      academicFaculty: z.string({
-        required_error: 'Academic faculty ObjectId is required',
-      }),
       academicDepartment: z.string({
         required_error: 'Academic department ObjectId is required',
       }),
