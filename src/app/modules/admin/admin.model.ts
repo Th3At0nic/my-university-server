@@ -52,7 +52,7 @@ const adminSchema = new Schema<TAdmin>(
     },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
-    profileImage: { type: String, required: true },
+    profileImage: { type: String, default: '' },
     managementDepartment: {
       type: Schema.Types.ObjectId,
       ref: 'Academic_Department',

@@ -56,7 +56,7 @@ export const facultySchema = new Schema<TFaculty>(
     },
     presentAddress: { type: String, required: true },
     permanentAddress: { type: String, required: true },
-    profileImage: { type: String, required: true },
+    profileImage: { type: String, default: '' },
     academicFaculty: {
       type: Schema.Types.ObjectId,
       ref: 'Academic_Faculty',
