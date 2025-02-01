@@ -1,10 +1,20 @@
 import { QueryBuilder } from '../../builder/QueryBuilder';
+import { InternalServerError } from '../../errors/InternalServerError';
 import { NotFoundError } from '../../errors/NotFoundError';
 import { TAcademicFaculty } from './academicFaculty.interface';
 import { AcademicFacultyModel } from './academicFaculty.model';
 
 const createAcademicFacultyIntoDB = async (data: TAcademicFaculty) => {
   const result = await AcademicFacultyModel.create(data);
+  if (!result) {
+    throw new InternalServerError('Failed to Create Academic Faculty', [
+      {
+        path: 'server',
+        message:
+          'An unexpected error occurred while creating the academic faculty. Please try again later.',
+      },
+    ]);
+  }
   return result;
 };
 

@@ -9,26 +9,36 @@ const router = Router();
 
 router.post(
   '/create-academic-faculty',
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.superAdmin),
   validateRequest(AcademicFacultyValidation),
   AcademicFacultyControllers.createAcademicFaculty,
 );
 
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   AcademicFacultyControllers.getAllAcademicFaculty,
 );
 
 router.get(
   '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   AcademicFacultyControllers.getAnAcademicFaculty,
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(AcademicFacultyValidation),
   AcademicFacultyControllers.updateAnAcademicFaculty,
 );

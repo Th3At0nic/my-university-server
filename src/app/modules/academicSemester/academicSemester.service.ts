@@ -1,4 +1,5 @@
 import { QueryBuilder } from '../../builder/QueryBuilder';
+import { InternalServerError } from '../../errors/InternalServerError';
 import { NotFoundError } from '../../errors/NotFoundError';
 import { ValidationError } from '../../errors/ValidationError';
 import { semesterCodeNameMapper } from './academicSemester.constants';
@@ -25,6 +26,15 @@ const createAcademicSemesterIntoDB = async (payload: TAcademicSemester) => {
     throw new ValidationError('Mismatch semester name & code!', errorSource);
   } else {
     const result = await SemesterModel.create(payload);
+    if (!result) {
+      throw new InternalServerError('Failed to Create Academic Semester', [
+        {
+          path: 'server',
+          message:
+            'An unexpected error occurred while creating the academic semester. Please try again later.',
+        },
+      ]);
+    }
     return result;
   }
 };

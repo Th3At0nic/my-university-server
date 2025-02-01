@@ -149,11 +149,4 @@ studentSchema.statics.isUserExists = async function (id: string) {
   return existingUser;
 };
 
-//these are used to  create an instance method into the schema. this method will query on the db
-// studentSchema.methods.isUserExists = async function (id: string) {
-//   const existingUser = await StudentModel.findOne({ id });
-
-//   return existingUser;
-// };
-
 export const StudentModel = model<TStudent, IStudent>('Student', studentSchema);

@@ -145,6 +145,20 @@ const createFacultyIntoDB = async (
       email: facultyData.email,
     };
 
+    const isAcademicDepartmentExists = await DepartmentModel.findById(
+      facultyData.academicDepartment,
+    );
+
+    if (!isAcademicDepartmentExists) {
+      throw new NotFoundError('Academic Department Not Found', [
+        {
+          path: 'academicDepartment',
+          message:
+            'The academic department with the provided ID does not exist. Please verify the ID and try again.',
+        },
+      ]);
+    }
+
     const newUser = await UserModel.create([user], { session });
 
     if (newUser.length) {
@@ -152,6 +166,8 @@ const createFacultyIntoDB = async (
       facultyData.id = newUser[0].id;
 
       facultyData.user = newUser[0]._id;
+
+      facultyData.academicFaculty = isAcademicDepartmentExists.academicFaculty;
 
       facultyData.isDeleted = newUser[0].isDeleted;
 
@@ -221,6 +237,20 @@ const createAdminIntoDB = async (
       id: await generateRoleBasedId('admin'),
       email: adminData.email,
     };
+
+    const isAcademicDepartmentExists = await DepartmentModel.findById(
+      adminData.managementDepartment,
+    );
+
+    if (!isAcademicDepartmentExists) {
+      throw new NotFoundError('Academic Department Not Found', [
+        {
+          path: 'academicDepartment',
+          message:
+            'The academic department with the provided ID does not exist. Please verify the ID and try again.',
+        },
+      ]);
+    }
 
     const newUser = await UserModel.create([user], { session });
 

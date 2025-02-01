@@ -50,16 +50,3 @@ export interface IStudent extends Model<TStudent> {
   // eslint-disable-next-line no-unused-vars
   isUserExists(id: string): Promise<TStudent | null>;
 }
-
-// creating a type of for a function which will used in other file for find the user is exists or not in the db
-// export type TStudentMethods = {
-//   // eslint-disable-next-line no-unused-vars
-//   isUserExists(id: string): Promise<TStudent | null>;
-// };
-
-// creating a type of a model which will be passed into the real model to let the mongoose know about this model which will be use to  query on the db , this is needed for type-safety
-// export type TStudentModel = Model<
-//   TStudent,
-//   Record<string, never>,
-//   TStudentMethods
-// >;
