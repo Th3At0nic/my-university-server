@@ -44,11 +44,13 @@ export const globalErrorHandler: ErrorRequestHandler = (
     message = simplifiedError.message;
     errorSource = simplifiedError.errorSource;
   }
+
   // if (err instanceof NotFoundError) {
   //   statusCode = err.statusCode;
   //   message = err.message;
   //   errorSource = err.errorSource;
-  // } else if (err instanceof ValidationError) {
+  // }
+  // else if (err instanceof ValidationError) {
   //   statusCode = err.statusCode;
   //   message = err.message;
   //   errorSource = err.errorSource;
