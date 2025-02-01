@@ -4,6 +4,7 @@ import { ConflictError } from '../../errors/ConflictError';
 import { NotFoundError } from '../../errors/NotFoundError';
 import { TCourse, TCourseFaculty } from './course.interface';
 import { CourseFacultyModel, CourseModel } from './course.model';
+import { InternalServerError } from '../../errors/InternalServerError';
 
 const createCourseIntoDB = async (payload: TCourse) => {
   const isCourseExists = await CourseModel.findOne({
@@ -22,10 +23,20 @@ const createCourseIntoDB = async (payload: TCourse) => {
 
   const result = await CourseModel.create(payload);
 
+  if (!result) {
+    throw new InternalServerError('Failed to Create the course', [
+      {
+        path: 'server',
+        message:
+          'An unexpected error occurred while creating the course. Please try again later.',
+      },
+    ]);
+  }
+
   const populatedResult = await CourseModel.findById(result._id).populate(
     'preRequisiteCourses.course',
   );
-  return populatedResult;
+  return populatedResult ? populatedResult : result;
 };
 
 const getAllCoursesFromDB = async (query: Record<string, unknown>) => {

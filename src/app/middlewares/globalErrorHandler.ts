@@ -45,21 +45,6 @@ export const globalErrorHandler: ErrorRequestHandler = (
     errorSource = simplifiedError.errorSource;
   }
 
-  // if (err instanceof NotFoundError) {
-  //   statusCode = err.statusCode;
-  //   message = err.message;
-  //   errorSource = err.errorSource;
-  // }
-  // else if (err instanceof ValidationError) {
-  //   statusCode = err.statusCode;
-  //   message = err.message;
-  //   errorSource = err.errorSource;
-  // } else if (err instanceof ConflictError) {
-  //   statusCode = err.statusCode;
-  //   message = err.message;
-  //   errorSource = err.errorSource;
-  // }
-
   res.status(statusCode).json({
     success: false,
     message,

@@ -4,7 +4,6 @@ import sendResponse from '../../utils/sendResponse';
 import catchAsync from '../../utils/catchAsync';
 import { JwtPayload } from 'jsonwebtoken';
 import { userServices } from './user.service';
-// import studentValidationSchema from '../student/student.validation';
 
 //imported HOF(catchAsync()) to pass the async func there to handle the promise and error, reduced boilerplates
 

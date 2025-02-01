@@ -9,23 +9,27 @@ const router = Router();
 
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.faculty),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.faculty),
   AdminControllers.getAllAdmins,
 );
 
 router.get(
   '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.faculty),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.faculty),
   AdminControllers.getAnAdmin,
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(updateAdminValidationSchema),
   AdminControllers.updateAdmin,
 );
 
-router.delete('/:id', auth(USER_ROLE.admin), AdminControllers.deleteAdmin);
+router.delete(
+  '/:id',
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  AdminControllers.deleteAdmin,
+);
 
 export const AdminRoutes = router;

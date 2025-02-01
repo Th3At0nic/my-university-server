@@ -137,7 +137,6 @@ export const updateFacultyValidationSchema = z.object({
         .optional(), // Optional for update
       presentAddress: z.string().optional(), // Optional for update
       permanentAddress: z.string().optional(), // Optional for update
-      academicFaculty: z.string().optional(), // Optional for update
       academicDepartment: z.string().optional(), // Optional for update
     }),
   }),
