@@ -86,15 +86,7 @@ export const studentValidationSchema = z.object({
       localGuardian: localGuardianValidationSchema.optional(),
       academicDepartment: z
         .string()
-        .regex(objectIdRegex, { message: 'Invalid ObjectId format' }) // Regex validation
-        .refine(
-          async (id) => {
-            // Check in the database if the semester exists
-            const exists = await DepartmentModel.exists({ _id: id });
-            return !!exists; // Return true if found, false otherwise
-          },
-          { message: 'Department ID does not exist in the database' }, // Error message for non-existent ID
-        ),
+        .regex(objectIdRegex, { message: 'Invalid ObjectId format' }), // Regex validation
       admissionSemester: z
         .string()
         .regex(objectIdRegex, { message: 'Invalid ObjectId format' }) // Regex validation

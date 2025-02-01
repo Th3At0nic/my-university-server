@@ -12,9 +12,10 @@ import { TFaculty } from '../faculty/faculty.interface';
 import { TAdmin } from '../admin/admin.interface';
 import { AdminModel } from '../admin/admin.model';
 import { USER_ROLE } from './user.constant';
-import { NotFoundError } from '../../errors/NotFoundError';
 import { InternalServerError } from '../../errors/InternalServerError';
 import { sendImageToCloudinary } from '../../utils/sendImageToCloudinary';
+import { DepartmentModel } from '../academicDepartment/academicDepartment.model';
+import { NotFoundError } from '../../errors/NotFoundError';
 
 const createStudentIntoDB = async (
   file: any,
@@ -45,24 +46,42 @@ const createStudentIntoDB = async (
       ]);
     }
 
+    const isAcademicDepartmentExists = await DepartmentModel.findById(
+      studentData.academicDepartment,
+    );
+
+    if (!isAcademicDepartmentExists) {
+      throw new NotFoundError('Academic Department Not Found', [
+        {
+          path: 'academicDepartment',
+          message:
+            'The academic department with the provided ID does not exist. Please verify the ID and try again.',
+        },
+      ]);
+    }
+
     //creating a new user
     const newUser = await UserModel.create([user], { session });
 
     if (newUser.length) {
       //student id format : year/semesterCode/id
       studentData.id = newUser[0].id;
-      // studentData.id = generateId(studentData);
 
       studentData.user = newUser[0]._id;
+
+      studentData.academicFaculty = isAcademicDepartmentExists.academicFaculty;
 
       studentData.isDeleted = newUser[0].isDeleted;
 
       //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
-      const imgName = `${user.id}${studentData.name.firstName}`;
-      const imgPath = file.path;
-      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
 
-      studentData.profileImg = uploadImgResult?.secure_url as string;
+      if (file?.path) {
+        const imgName = `${user.id}${studentData.name.firstName}`;
+        const imgPath = file?.path;
+        const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+
+        studentData.profileImg = uploadImgResult?.secure_url as string;
+      }
 
       //creating a new student
       const newStudent = await StudentModel.create([studentData], {
@@ -99,6 +118,7 @@ const createStudentIntoDB = async (
         },
       ]);
     }
+    throw err;
   } finally {
     session.endSession();
   }
@@ -136,11 +156,13 @@ const createFacultyIntoDB = async (
       facultyData.isDeleted = newUser[0].isDeleted;
 
       //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
-      const imgName = `${user.id}${facultyData.name.firstName}`;
-      const imgPath = file.path;
-      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+      if (file?.path) {
+        const imgName = `${user.id}${facultyData.name.firstName}`;
+        const imgPath = file.path;
+        const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
 
-      facultyData.profileImage = uploadImgResult?.secure_url as string;
+        facultyData.profileImage = uploadImgResult?.secure_url as string;
+      }
 
       const newFaculty = await FacultyModel.create([facultyData], { session });
 
@@ -174,6 +196,7 @@ const createFacultyIntoDB = async (
         },
       ]);
     }
+    throw err;
   } finally {
     session.endSession();
   }
@@ -210,11 +233,13 @@ const createAdminIntoDB = async (
       adminData.isDeleted = newUser[0].isDeleted;
 
       //naming the given img from user, and then uploading it to cloudinary and then passing the imgURL to the studentData to keep in mongoDB
-      const imgName = `${user.id}${adminData.name.firstName}`;
-      const imgPath = file.path;
-      const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
+      if (file?.path) {
+        const imgName = `${user.id}${adminData.name.firstName}`;
+        const imgPath = file.path;
+        const uploadImgResult = await sendImageToCloudinary(imgPath, imgName);
 
-      adminData.profileImage = uploadImgResult?.secure_url as string;
+        adminData.profileImage = uploadImgResult?.secure_url as string;
+      }
 
       const newAdmin = await AdminModel.create([adminData], { session });
 
