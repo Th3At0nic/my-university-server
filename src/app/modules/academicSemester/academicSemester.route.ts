@@ -12,7 +12,7 @@ const router = Router();
 
 router.post(
   '/create-academic-semester',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(createAcademicSemesterValidation),
   AcademicSemesterControllers.createAcademicSemester,
 );
