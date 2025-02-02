@@ -12,32 +12,42 @@ const router = Router();
 
 router.post(
   '/create-semester-registration',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(SemesterRegistrationValidationSchema),
   SemesterRegistrationControllers.createSemesterRegistration,
 );
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   SemesterRegistrationControllers.getAllRegisteredSemesters,
 );
 
 router.get(
   '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   SemesterRegistrationControllers.getARegisteredSemester,
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(UpdateSemesterRegistrationValidationSchema),
   SemesterRegistrationControllers.updateRegisteredSemester,
 );
 
 router.delete(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   SemesterRegistrationControllers.deleteRegisteredSemester,
 );
 

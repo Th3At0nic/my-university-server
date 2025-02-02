@@ -86,7 +86,7 @@ const createEnrolledCourseIntoDB = async (
       ]);
     }
 
-    if (registeredSemester.status !== 'UPCOMING') {
+    if (registeredSemester.status === 'ENDED') {
       throw new ConflictError('Enrollment not allowed', [
         {
           path: 'semesterRegistration',

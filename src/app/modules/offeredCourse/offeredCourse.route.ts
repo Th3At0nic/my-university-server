@@ -12,33 +12,44 @@ const router = Router();
 
 router.post(
   '/create-offered-course',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(OfferedCourseValidationSchema),
   OfferedCourseControllers.createOfferedCourse,
 );
 
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.faculty),
   OfferedCourseControllers.getAllOfferedCourse,
 );
 
 router.get(
+  '/my-offered-courses',
+  auth(USER_ROLE.student),
+  OfferedCourseControllers.getMyOfferedCourse,
+);
+
+router.get(
   '/:id',
-  auth(USER_ROLE.admin, USER_ROLE.faculty, USER_ROLE.student),
+  auth(
+    USER_ROLE.admin,
+    USER_ROLE.superAdmin,
+    USER_ROLE.faculty,
+    USER_ROLE.student,
+  ),
   OfferedCourseControllers.getAOfferedCourse,
 );
 
 router.patch(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(updateOfferedCourseValidationSchema),
   OfferedCourseControllers.updateOfferedCourse,
 );
 
 router.delete(
   '/:id',
-  auth(USER_ROLE.admin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   OfferedCourseControllers.deleteOfferedCourse,
 );
 
