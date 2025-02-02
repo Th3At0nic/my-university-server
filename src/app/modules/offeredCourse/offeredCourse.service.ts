@@ -12,6 +12,7 @@ import { hasTimeConflict } from './offeredCourse.utils';
 import { TSemesterRegistration } from '../semesterRegistration/semesterRegistration.interface';
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { StudentModel } from '../student/student.model';
+import { EnrolledCourseModel } from '../enrolledCourse/enrolledCourse.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -172,6 +173,7 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
 };
 
 const getMyOfferedCoursesFromDB = async (userId: string) => {
+  // 1️⃣ Find student details
   const student = await StudentModel.findOne({ id: userId });
 
   if (!student) {
@@ -184,6 +186,7 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     ]);
   }
 
+  // 2️⃣ Get the current ongoing semester
   const currentOngoingRegistrationSemester =
     await SemesterRegistrationModel.findOne({ status: 'ONGOING' });
 
@@ -197,35 +200,34 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     ]);
   }
 
-  const result = await OfferedCourseModel.aggregate([
-    {
-      $match: {
-        semesterRegistration: currentOngoingRegistrationSemester?._id,
-        academicFaculty: student?.academicFaculty,
-        academicDepartment: student?.academicDepartment,
-      },
-    },
-    {
-      $lookup: {
-        from: 'courses', //from where the data will be look up or populated,
-        localField: 'course', // local field means my current field name where the populated data will be shown
-        foreignField: '_id', // foreign field means the mongodb id of the course in courses collection
-        as: 'course',
-      },
-    },
-  ]);
+  // 3️⃣ Get the courses the student has already enrolled in
+  const enrolledCourses = await EnrolledCourseModel.find({
+    student: student._id,
+    academicDepartment: student.academicDepartment,
+    semesterRegistration: currentOngoingRegistrationSemester._id,
+  }).select('course');
 
-  if (!result.length) {
-    throw new NotFoundError('No Offered Courses Found', [
+  const enrolledCourseIds = enrolledCourses.map((course) => course.course);
+
+  // 4️⃣ Find offered courses, excluding already enrolled courses
+  const unenrolledOfferedCourses = await OfferedCourseModel.find({
+    semesterRegistration: currentOngoingRegistrationSemester._id,
+    academicFaculty: student.academicFaculty,
+    academicDepartment: student.academicDepartment,
+    course: { $nin: enrolledCourseIds }, // Exclude already enrolled courses
+  }).populate('course');
+
+  if (!unenrolledOfferedCourses.length) {
+    throw new NotFoundError('No Available Courses Found', [
       {
         path: 'offeredCourses',
         message:
-          'No offered courses were found for your academic department and faculty in the ongoing semester.',
+          'You have either enrolled in all available courses or no courses are currently offered for your department and semester.',
       },
     ]);
   }
 
-  return result;
+  return unenrolledOfferedCourses;
 };
 
 const getAOfferedCourseFromDB = async (id: string) => {
