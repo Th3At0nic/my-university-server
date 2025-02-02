@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
+import { JwtPayload } from 'jsonwebtoken';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { OfferedCourseServices } from './offeredCourse.service';
@@ -13,8 +14,17 @@ const createOfferedCourse = catchAsync(async (req, res, next) => {
 });
 
 const getAllOfferedCourse = catchAsync(async (req, res, next) => {
-  const result = await OfferedCourseServices.getAllOfferedCoursesFromDB();
+  const result = await OfferedCourseServices.getAllOfferedCoursesFromDB(
+    req.query,
+  );
   const message = 'Successfully Retrieved all Offered Courses';
+  sendResponse(res, 200, true, message, result);
+});
+
+const getMyOfferedCourse = catchAsync(async (req, res, next) => {
+  const { userId } = req.user as JwtPayload;
+  const result = await OfferedCourseServices.getMyOfferedCoursesFromDB(userId);
+  const message = 'Successfully Retrieved My Offered Courses';
   sendResponse(res, 200, true, message, result);
 });
 
@@ -46,6 +56,7 @@ const deleteOfferedCourse = catchAsync(async (req, res, next) => {
 export const OfferedCourseControllers = {
   createOfferedCourse,
   getAllOfferedCourse,
+  getMyOfferedCourse,
   getAOfferedCourse,
   updateOfferedCourse,
   deleteOfferedCourse,

@@ -258,6 +258,26 @@ const removeFacultiesFromCourseFromDB = async (
   return populatedResult;
 };
 
+const getFacultiesWithCourseFromDB = async (courseId: string) => {
+  const result = await CourseFacultyModel.findOne({
+    course: courseId,
+  })
+    .populate('course')
+    .populate('faculties');
+
+  if (!result) {
+    throw new NotFoundError('Faculties Not Found', [
+      {
+        path: 'course',
+        message:
+          'No faculties are assigned to the provided course ID. Please verify the course ID and try again.',
+      },
+    ]);
+  }
+
+  return result;
+};
+
 export const CourseServices = {
   createCourseIntoDB,
   getAllCoursesFromDB,
@@ -266,4 +286,5 @@ export const CourseServices = {
   deleteCourseFromDB,
   assignFacultiesToCourseIntoDB,
   removeFacultiesFromCourseFromDB,
+  getFacultiesWithCourseFromDB,
 };

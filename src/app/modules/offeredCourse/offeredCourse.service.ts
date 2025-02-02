@@ -10,6 +10,8 @@ import { FacultyModel } from '../faculty/faculty.model';
 import { AcademicFacultyModel } from '../academicFaculty/academicFaculty.model';
 import { hasTimeConflict } from './offeredCourse.utils';
 import { TSemesterRegistration } from '../semesterRegistration/semesterRegistration.interface';
+import { QueryBuilder } from '../../builder/QueryBuilder';
+import { StudentModel } from '../student/student.model';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -147,8 +149,13 @@ const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   return result;
 };
 
-const getAllOfferedCoursesFromDB = async () => {
-  const result = await OfferedCourseModel.find();
+const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
+  const offeredCourseQuery = new QueryBuilder(query, OfferedCourseModel.find())
+    .filter()
+    .sortBy()
+    .paginate()
+    .fields();
+  const result = await offeredCourseQuery.modelQuery;
   if (!result || result.length === 0) {
     throw new NotFoundError('No Offered Courses Found', [
       {
@@ -158,6 +165,66 @@ const getAllOfferedCoursesFromDB = async () => {
       },
     ]);
   }
+
+  const meta = await offeredCourseQuery.countTotal();
+
+  return { meta, result };
+};
+
+const getMyOfferedCoursesFromDB = async (userId: string) => {
+  const student = await StudentModel.findOne({ id: userId });
+
+  if (!student) {
+    throw new NotFoundError('Student Not Found', [
+      {
+        path: 'authorization.token',
+        message:
+          'No student was found in the system. Please login and try again',
+      },
+    ]);
+  }
+
+  const currentOngoingRegistrationSemester =
+    await SemesterRegistrationModel.findOne({ status: 'ONGOING' });
+
+  if (!currentOngoingRegistrationSemester) {
+    throw new NotFoundError('Ongoing Semester Registration Not Found', [
+      {
+        path: 'semesterRegistration',
+        message:
+          'No ongoing semester registration was found. Please check if the registration period has started.',
+      },
+    ]);
+  }
+
+  const result = await OfferedCourseModel.aggregate([
+    {
+      $match: {
+        semesterRegistration: currentOngoingRegistrationSemester?._id,
+        academicFaculty: student?.academicFaculty,
+        academicDepartment: student?.academicDepartment,
+      },
+    },
+    {
+      $lookup: {
+        from: 'courses', //from where the data will be look up or populated,
+        localField: 'course', // local field means my current field name where the populated data will be shown
+        foreignField: '_id', // foreign field means the mongodb id of the course in courses collection
+        as: 'course',
+      },
+    },
+  ]);
+
+  if (!result.length) {
+    throw new NotFoundError('No Offered Courses Found', [
+      {
+        path: 'offeredCourses',
+        message:
+          'No offered courses were found for your academic department and faculty in the ongoing semester.',
+      },
+    ]);
+  }
+
   return result;
 };
 
@@ -351,6 +418,7 @@ const deleteOfferedCourseFromDB = async (id: string) => {
 export const OfferedCourseServices = {
   createOfferedCourseIntoDB,
   getAllOfferedCoursesFromDB,
+  getMyOfferedCoursesFromDB,
   getAOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
   deleteOfferedCourseFromDB,
