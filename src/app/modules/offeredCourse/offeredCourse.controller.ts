@@ -23,7 +23,10 @@ const getAllOfferedCourse = catchAsync(async (req, res, next) => {
 
 const getMyOfferedCourse = catchAsync(async (req, res, next) => {
   const { userId } = req.user as JwtPayload;
-  const result = await OfferedCourseServices.getMyOfferedCoursesFromDB(userId);
+  const result = await OfferedCourseServices.getMyOfferedCoursesFromDB(
+    userId,
+    req.query,
+  );
   const message = 'Successfully Retrieved My Offered Courses';
   sendResponse(res, 200, true, message, result);
 });
