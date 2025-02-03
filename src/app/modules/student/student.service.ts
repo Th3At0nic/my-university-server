@@ -14,12 +14,8 @@ const getAllStudentsFromDB = async (query: Record<string, unknown>) => {
     StudentModel.find().populate([
       'admissionSemester',
       'user',
-      {
-        path: 'academicDepartment',
-        populate: {
-          path: 'academicFaculty',
-        },
-      },
+      'academicDepartment',
+      'academicFaculty',
     ]),
   )
     .search(studentSearchableFields)
@@ -49,12 +45,8 @@ const getSingleStudentFromDB = async (id: string) => {
   const result = await StudentModel.findById(id).populate([
     'admissionSemester',
     'user',
-    {
-      path: 'academicDepartment',
-      populate: {
-        path: 'academicFaculty',
-      },
-    },
+    'academicDepartment',
+    'academicFaculty',
   ]);
 
   if (!result) {

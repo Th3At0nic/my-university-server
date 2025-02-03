@@ -19,14 +19,11 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
   ];
   const facultyQuery = new QueryBuilder(
     query,
-    FacultyModel.find()
-      .populate('academicFaculty')
-      .populate({
-        path: 'academicDepartment',
-        populate: {
-          path: 'academicFaculty',
-        },
-      }),
+    FacultyModel.find().populate([
+      'user',
+      'academicFaculty',
+      'academicDepartment',
+    ]),
   )
     .search(searchableFields)
     .filter()
