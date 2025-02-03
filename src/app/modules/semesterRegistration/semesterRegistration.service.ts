@@ -100,7 +100,10 @@ const getAllRegisteredSemestersFromDB = async (
       },
     ]);
   }
-  return result;
+
+  const meta = await semesterRegistrationQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getARegisteredSemesterFromDB = async (id: string) => {

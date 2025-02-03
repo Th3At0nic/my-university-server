@@ -61,7 +61,10 @@ const getAllAcademicDepartmentFromDB = async (
       },
     ]);
   }
-  return result;
+
+  const meta = await academicDepartmentQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getAnAcademicDepartmentFromDB = async (id: string) => {

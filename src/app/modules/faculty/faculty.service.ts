@@ -42,7 +42,10 @@ const getAllFacultiesFromDB = async (query: Record<string, unknown>) => {
       },
     ]);
   }
-  return result;
+
+  const meta = await facultyQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getAFacultyFromDB = async (id: string) => {

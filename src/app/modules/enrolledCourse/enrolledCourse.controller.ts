@@ -25,7 +25,9 @@ const updateEnrolledCourseMarks = catchAsync(async (req, res, next) => {
 });
 
 const getAllEnrolledCourse = catchAsync(async (req, res, next) => {
-  const result = await EnrolledCourseServices.getAllEnrolledCourseFromDB();
+  const result = await EnrolledCourseServices.getAllEnrolledCourseFromDB(
+    req.query,
+  );
   const message = 'Retrieved all enrolled course successfully';
   sendResponse(res, 200, true, message, result);
 });

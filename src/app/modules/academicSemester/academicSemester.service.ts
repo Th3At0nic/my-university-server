@@ -62,7 +62,9 @@ const getAllAcademicSemestersFromDB = async (
     ]);
   }
 
-  return result;
+  const meta = await academicSemesterQuery.countTotal();
+
+  return { meta, result };
 };
 
 //retrieving a single academic semester with id from the DB

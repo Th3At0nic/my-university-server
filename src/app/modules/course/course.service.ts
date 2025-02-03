@@ -61,6 +61,7 @@ const getAllCoursesFromDB = async (query: Record<string, unknown>) => {
     ]);
   }
   const meta = await courseQuery.countTotal();
+
   return { meta, result };
 };
 
