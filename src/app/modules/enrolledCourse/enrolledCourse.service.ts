@@ -11,6 +11,7 @@ import { CourseModel } from '../course/course.model';
 import { FacultyModel } from '../faculty/faculty.model';
 import { UnauthorizedError } from '../../errors/UnauthorizedError';
 import { calculateGradeAndPoints } from './enrolledCourse.utils';
+import { QueryBuilder } from '../../builder/QueryBuilder';
 
 const createEnrolledCourseIntoDB = async (
   userId: string,
@@ -317,8 +318,13 @@ const updateCourseMarksIntoDB = async (
   return updatedEnrolledCourse;
 };
 
-const getAllEnrolledCourseFromDB = async () => {
-  const result = await EnrolledCourseModel.find();
+const getAllEnrolledCourseFromDB = async (query: Record<string, unknown>) => {
+  const enrolledCourseQuery = new QueryBuilder(
+    query,
+    EnrolledCourseModel.find(),
+  );
+
+  const result = await enrolledCourseQuery.modelQuery;
   if (!result.length) {
     throw new InternalServerError('No enrolled course Found', [
       {
@@ -328,7 +334,9 @@ const getAllEnrolledCourseFromDB = async () => {
     ]);
   }
 
-  return result;
+  const meta = await enrolledCourseQuery.countTotal();
+
+  return { meta, result };
 };
 
 export const EnrolledCourseServices = {

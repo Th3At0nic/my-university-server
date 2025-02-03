@@ -33,7 +33,10 @@ const getAllAdminsFromDB = async (query: Record<string, unknown>) => {
       { path: 'Admin', message: 'No admin found in the system' },
     ]);
   }
-  return result;
+
+  const meta = await adminQuery.countTotal();
+
+  return { meta, result };
 };
 
 const getAnAdminFromDB = async (id: string) => {
