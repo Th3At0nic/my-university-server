@@ -18,7 +18,7 @@ const getAllOfferedCourse = catchAsync(async (req, res, next) => {
     req.query,
   );
   const message = 'Successfully Retrieved all Offered Courses';
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 const getMyOfferedCourse = catchAsync(async (req, res, next) => {
@@ -28,12 +28,12 @@ const getMyOfferedCourse = catchAsync(async (req, res, next) => {
     req.query,
   );
   const message = 'Successfully Retrieved My Offered Courses';
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
-const getAOfferedCourse = catchAsync(async (req, res, next) => {
+const getAnOfferedCourse = catchAsync(async (req, res, next) => {
   const { id } = req.params;
-  const result = await OfferedCourseServices.getAOfferedCourseFromDB(id);
+  const result = await OfferedCourseServices.getAnOfferedCourseFromDB(id);
   const message = 'Successfully Retrieved the Offered Course';
   sendResponse(res, 200, true, message, result);
 });
@@ -60,7 +60,7 @@ export const OfferedCourseControllers = {
   createOfferedCourse,
   getAllOfferedCourse,
   getMyOfferedCourse,
-  getAOfferedCourse,
+  getAnOfferedCourse,
   updateOfferedCourse,
   deleteOfferedCourse,
 };

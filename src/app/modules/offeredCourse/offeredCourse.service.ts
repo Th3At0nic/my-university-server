@@ -284,7 +284,7 @@ const getMyOfferedCoursesFromDB = async (
   return { meta, result: paginatedCourses };
 };
 
-const getAOfferedCourseFromDB = async (id: string) => {
+const getAnOfferedCourseFromDB = async (id: string) => {
   const result = await OfferedCourseModel.findById(id);
   if (!result) {
     throw new NotFoundError('Offered Course Not Found', [
@@ -475,7 +475,7 @@ export const OfferedCourseServices = {
   createOfferedCourseIntoDB,
   getAllOfferedCoursesFromDB,
   getMyOfferedCoursesFromDB,
-  getAOfferedCourseFromDB,
+  getAnOfferedCourseFromDB,
   updateOfferedCourseIntoDB,
   deleteOfferedCourseFromDB,
 };

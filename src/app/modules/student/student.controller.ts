@@ -12,7 +12,7 @@ const getAllStudents = catchAsync(
 
     const message = 'Successfully retrieved students!';
 
-    sendResponse(res, 200, true, message, result);
+    sendResponse(res, 200, true, message, result.result, result.meta);
   },
 );
 

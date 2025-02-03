@@ -25,7 +25,7 @@ const getAllAcademicSemester = catchAsync(async (req, res, next) => {
 
   const message = 'All Academic semesters are retrieved successfully!';
 
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 //req handling for retrieving a single academic semester with id from the DB

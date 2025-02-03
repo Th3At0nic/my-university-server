@@ -19,7 +19,7 @@ const getAllAcademicDepartment = catchAsync(async (req, res, next) => {
     await AcademicDepartmentServices.getAllAcademicDepartmentFromDB(req.query);
   const message = 'All academic department retrieved successfully!';
 
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 const getAnAcademicDepartment = catchAsync(async (req, res, next) => {

@@ -19,7 +19,7 @@ const getAllAcademicFaculty = catchAsync(async (req, res, next) => {
   );
   const message = 'Retrieved all Academic Faculty Successfully!';
 
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 const getAnAcademicFaculty = catchAsync(async (req, res, next) => {
