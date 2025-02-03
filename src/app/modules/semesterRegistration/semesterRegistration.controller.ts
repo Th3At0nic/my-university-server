@@ -19,7 +19,7 @@ const getAllRegisteredSemesters = catchAsync(async (req, res, next) => {
       req.query,
     );
   const message = 'Retrieved all registered semesters successfully!';
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 const getARegisteredSemester = catchAsync(async (req, res, next) => {

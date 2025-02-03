@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable no-unused-vars */
+import { JwtPayload } from 'jsonwebtoken';
 import catchAsync from '../../utils/catchAsync';
 import sendResponse from '../../utils/sendResponse';
 import { EnrolledCourseServices } from './enrolledCourse.service';
@@ -29,11 +30,23 @@ const getAllEnrolledCourse = catchAsync(async (req, res, next) => {
     req.query,
   );
   const message = 'Retrieved all enrolled course successfully';
-  sendResponse(res, 200, true, message, result);
+  sendResponse(res, 200, true, message, result.result, result.meta);
+});
+
+const getMyEnrolledCourses = catchAsync(async (req, res, next) => {
+  const { userId } = req.user as JwtPayload;
+
+  const result = await EnrolledCourseServices.getMyEnrolledCoursesFromDB(
+    userId,
+    req.query,
+  );
+  const message = 'Retrieved Your all enrolled course successfully';
+  sendResponse(res, 200, true, message, result.result, result.meta);
 });
 
 export const EnrolledCourseControllers = {
   createEnrolledCourse,
   updateEnrolledCourseMarks,
   getAllEnrolledCourse,
+  getMyEnrolledCourses,
 };

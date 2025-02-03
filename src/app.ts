@@ -14,7 +14,7 @@ app.use(express.json());
 //cookie parser
 app.use(cookieParser());
 //cors
-app.use(cors({ origin: ['http://localhost:3000'] }));
+app.use(cors({ origin: ['http://localhost:3000'], credentials: true }));
 
 //routing to the router folder
 app.use('/api/v1/', router);

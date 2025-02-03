@@ -37,7 +37,7 @@ router.get(
     USER_ROLE.faculty,
     USER_ROLE.student,
   ),
-  OfferedCourseControllers.getAOfferedCourse,
+  OfferedCourseControllers.getAnOfferedCourse,
 );
 
 router.patch(

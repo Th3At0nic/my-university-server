@@ -339,8 +339,36 @@ const getAllEnrolledCourseFromDB = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 
+const getMyEnrolledCoursesFromDB = async (
+  studentId: string,
+  query: Record<string, unknown>,
+) => {
+  const isStudentExists = await StudentModel.findOne({ id: studentId });
+  if (!isStudentExists) {
+    throw new UnauthorizedError(`Unauthorized access!`, [
+      {
+        path: `${studentId}`,
+        message: `Invalid or expired token. Please log in again.`,
+      },
+    ]);
+  }
+
+  const myEnrolledCoursesQuery = new QueryBuilder(
+    query,
+    EnrolledCourseModel.find({ student: isStudentExists._id }).populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
+  );
+
+  const result = await myEnrolledCoursesQuery.modelQuery;
+  const meta = await myEnrolledCoursesQuery.countTotal();
+
+  return { meta, result };
+};
+
 export const EnrolledCourseServices = {
   createEnrolledCourseIntoDB,
   updateCourseMarksIntoDB,
   getAllEnrolledCourseFromDB,
+  getMyEnrolledCoursesFromDB,
 };
