@@ -18,7 +18,7 @@ const courseSchema = new Schema<TCourse>({
   code: { type: Number, trim: true, required: true },
   credits: { type: Number, trim: true, required: true },
   isDeleted: { type: Boolean, required: true, default: false },
-  preRequisiteCourses: [preRequisiteCourses],
+  preRequisiteCourses: { type: [preRequisiteCourses], default: [] },
 });
 
 // For find-like operations

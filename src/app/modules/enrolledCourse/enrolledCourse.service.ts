@@ -320,11 +320,10 @@ const updateCourseMarksIntoDB = async (
 const getAllEnrolledCourseFromDB = async () => {
   const result = await EnrolledCourseModel.find();
   if (!result.length) {
-    throw new InternalServerError('Failed to retrieved enrolled courses', [
+    throw new InternalServerError('No enrolled course Found', [
       {
         path: 'database',
-        message:
-          'An unexpected error occurred while retrieving enrolled courses.',
+        message: 'No enrolled course found in our system',
       },
     ]);
   }
