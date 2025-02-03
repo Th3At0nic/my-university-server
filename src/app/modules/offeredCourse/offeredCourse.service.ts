@@ -173,7 +173,10 @@ const getAllOfferedCoursesFromDB = async (query: Record<string, unknown>) => {
   return { meta, result };
 };
 
-const getMyOfferedCoursesFromDB = async (userId: string) => {
+const getMyOfferedCoursesFromDB = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
   // 1️⃣ Find student details
   const student = await StudentModel.findOne({ id: userId });
 
@@ -262,7 +265,23 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     ]);
   }
 
-  return eligibleCourses;
+  // Get total eligible courses count
+  const total = eligibleCourses.length;
+
+  // Get page & limit from query, set defaults if not provided
+  const page = Number(query.page) || 1;
+  const limit = Number(query.limit) || 10;
+
+  // Calculate total pages
+  const totalPage = Math.ceil(total / limit);
+
+  // Calculate pagination
+  const skip = (page - 1) * limit;
+  const paginatedCourses = eligibleCourses.slice(skip, skip + limit);
+
+  const meta = { page, limit, total, totalPage };
+
+  return { meta, result: paginatedCourses };
 };
 
 const getAOfferedCourseFromDB = async (id: string) => {
