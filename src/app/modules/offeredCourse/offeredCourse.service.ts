@@ -13,6 +13,7 @@ import { TSemesterRegistration } from '../semesterRegistration/semesterRegistrat
 import { QueryBuilder } from '../../builder/QueryBuilder';
 import { StudentModel } from '../student/student.model';
 import { EnrolledCourseModel } from '../enrolledCourse/enrolledCourse.model';
+import { TCourse } from '../course/course.interface';
 
 const createOfferedCourseIntoDB = async (payload: TOfferedCourse) => {
   const {
@@ -205,9 +206,17 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     student: student._id,
     academicDepartment: student.academicDepartment,
     semesterRegistration: currentOngoingRegistrationSemester._id,
-  }).select('course');
+  }).select(['course', 'isCompleted']);
 
-  const enrolledCourseIds = enrolledCourses.map((course) => course.course);
+  // Extract enrolled course IDs (completed or not)
+  const enrolledCourseIds = enrolledCourses.map((enrolledCourse) =>
+    enrolledCourse.course.toString(),
+  );
+
+  // Extract completed course IDs
+  const completedCourseIds = enrolledCourses
+    .filter((enrolledCourse) => enrolledCourse.isCompleted)
+    .map((enrolledCourse) => enrolledCourse.course.toString());
 
   // 4️⃣ Find offered courses, excluding already enrolled courses
   const unenrolledOfferedCourses = await OfferedCourseModel.find({
@@ -215,7 +224,7 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     academicFaculty: student.academicFaculty,
     academicDepartment: student.academicDepartment,
     course: { $nin: enrolledCourseIds }, // Exclude already enrolled courses
-  }).populate('course');
+  }).populate<{ course: TCourse }>('course');
 
   if (!unenrolledOfferedCourses.length) {
     throw new NotFoundError('No Available Courses Found', [
@@ -227,7 +236,33 @@ const getMyOfferedCoursesFromDB = async (userId: string) => {
     ]);
   }
 
-  return unenrolledOfferedCourses;
+  // 5️⃣ Filter out courses where prerequisites are not met
+  const eligibleCourses = unenrolledOfferedCourses.filter((offeredCourse) => {
+    const course = offeredCourse.course;
+    if (
+      !course.preRequisiteCourses ||
+      course.preRequisiteCourses.length === 0
+    ) {
+      return true; // No prerequisites, student can enroll
+    }
+
+    // Check if all prerequisites exist in completedCourseIds
+    return course?.preRequisiteCourses?.every((prerequisite) =>
+      completedCourseIds.includes(prerequisite.course.toString()),
+    );
+  });
+
+  if (!eligibleCourses.length) {
+    throw new NotFoundError('No Eligible Courses Found', [
+      {
+        path: 'offeredCourses',
+        message:
+          'You have not completed the prerequisite courses for any available courses in this semester.',
+      },
+    ]);
+  }
+
+  return eligibleCourses;
 };
 
 const getAOfferedCourseFromDB = async (id: string) => {
