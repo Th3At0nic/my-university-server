@@ -1,5 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import cors from 'cors';
 import express, { Application, Request, Response } from 'express';
 import { globalErrorHandler } from './app/middlewares/globalErrorHandler';
