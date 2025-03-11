@@ -27,12 +27,7 @@ router.delete(
 
 router.patch(
   '/:id',
-  auth(
-    USER_ROLE.admin,
-    USER_ROLE.faculty,
-    USER_ROLE.superAdmin,
-    USER_ROLE.student,
-  ),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
   validateRequest(updateStudentValidationSchema),
   studentController.updateStudent,
 );
