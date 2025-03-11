@@ -161,11 +161,6 @@ const updateLocalGuardianValidationSchema = z.object({
 // Validation for Student
 export const updateStudentValidationSchema = z.object({
   body: z.object({
-    password: z
-      .string()
-      .trim()
-      .max(35, { message: "Password can't have more than 35 characters" })
-      .optional(),
     student: z.object({
       name: updateUserNameValidationSchema,
       gender: z
