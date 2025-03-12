@@ -69,8 +69,18 @@ export const facultySchema = new Schema<TFaculty>(
     },
     isDeleted: { type: Boolean, required: true },
   },
-  { timestamps: true },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+    timestamps: true,
+  },
 );
+
+//creating mongoose virtual to derive property by computing
+facultySchema.virtual('fullName').get(function () {
+  return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
+});
 
 // For find-like operations
 facultySchema.pre(/^find/, function (this: Query<any, any>) {

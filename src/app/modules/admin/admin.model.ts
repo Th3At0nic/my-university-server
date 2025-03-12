@@ -60,8 +60,18 @@ const adminSchema = new Schema<TAdmin>(
     },
     isDeleted: { type: Boolean, required: true },
   },
-  { timestamps: true },
+  {
+    toJSON: {
+      virtuals: true,
+    },
+    timestamps: true,
+  },
 );
+
+//creating mongoose virtual to derive property by computing
+adminSchema.virtual('fullName').get(function () {
+  return `${this?.name?.firstName} ${this?.name?.middleName} ${this?.name?.lastName}`;
+});
 
 // For find-like operations
 adminSchema.pre(/^find/, function (this: Query<any, any>) {
