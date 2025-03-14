@@ -125,12 +125,16 @@ const changePassword = async (
   );
 
   if (!isOldPasswordValid) {
-    throw new UnauthorizedError('Invalid Credentials', [
-      {
-        path: 'password',
-        message: 'The provided old password is incorrect. Please try again.',
-      },
-    ]);
+    throw new UnauthorizedError(
+      'Old password is incorrect. Please try again.',
+      [
+        {
+          path: 'password',
+          message:
+            'Invalid Credentials. Old password is incorrect. Please try again.',
+        },
+      ],
+    );
   }
 
   //hash new password
@@ -139,7 +143,7 @@ const changePassword = async (
     Number(config.bcrypt_round_salt),
   );
 
-  await UserModel.findOneAndUpdate(
+  const result = await UserModel.findOneAndUpdate(
     {
       id: userData.userId,
       role: userData.role,
@@ -152,7 +156,7 @@ const changePassword = async (
     { new: true },
   );
 
-  return {};
+  return result ? {} : undefined;
 };
 
 const createNewAccessTokenByRefreshToken = async (token: string) => {
