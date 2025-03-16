@@ -321,7 +321,9 @@ const updateCourseMarksIntoDB = async (
 const getAllEnrolledCourseFromDB = async (query: Record<string, unknown>) => {
   const enrolledCourseQuery = new QueryBuilder(
     query,
-    EnrolledCourseModel.find(),
+    EnrolledCourseModel.find().populate(
+      'semesterRegistration academicSemester academicFaculty academicDepartment offeredCourse course student faculty',
+    ),
   );
 
   const result = await enrolledCourseQuery.modelQuery;

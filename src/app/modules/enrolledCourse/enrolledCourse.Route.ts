@@ -26,7 +26,7 @@ router.patch(
 
 router.get(
   '/',
-  auth(USER_ROLE.admin, USER_ROLE.superAdmin),
+  auth(USER_ROLE.admin, USER_ROLE.superAdmin, USER_ROLE.faculty),
   EnrolledCourseControllers.getAllEnrolledCourse,
 );
 
