@@ -15,7 +15,7 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
       {
         path: 'academicFaculty',
         message:
-          'The academic faculty with the provided ID does not exist or is invalid.',
+          'The academic faculty with the provided ID does not exist or is invalid',
       },
     ]);
   }
@@ -27,7 +27,7 @@ const createAcademicDepartmentIntoDB = async (payload: TAcademicDepartment) => {
       {
         path: 'server',
         message:
-          'An unexpected error occurred while creating the department. Please try again later.',
+          'An unexpected error occurred while creating the department. Please try again later .',
       },
     ]);
   }
